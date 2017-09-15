@@ -1,0 +1,15 @@
+{
+  "name": "greg/todo",
+  "authors": [
+    {
+      "name": "Gregory Goijaerts",
+      "email": "crecketgaming@gmail.com"
+    }
+  ],
+  "require": {},
+  "autoload": {
+    "psr-4": {
+      "Greg\\ToDo\\": "src/"
+    }
+  }
+}
