@@ -66,29 +66,7 @@ abstract class Repository
         return $this->mapDataToModel($data);
     }
 
-    /**
-     * @param $force_insert
-     *
-     * @return mixed
-     */
-    public function save($force_insert = false)
-    {
-        // lazy i know
-        if ($force_insert) {
-            return $this->insert();
-        }
-        if (!empty($this->columns[$this->primaryKey])) {
-            // Primary key is set, use update
-            return $this->update();
-        }
-        return $this->insert();
-    }
-
-    /**
-     * @return bool
-     * @throws \Exception
-     */
-    private function update()
+    public function update($model)
     {
         $sql = 'UPDATE '.$this->tableName.' SET ';
 
@@ -124,17 +102,12 @@ abstract class Repository
         return false;
     }
 
-    /**
-     * @return mixed
-     */
-    private function insert($model)
+    public function insert($model)
     {
-        // Create initial sql synthax
         $sql = 'INSERT INTO '.$this->tableName.' ( ';
         $sql_questionmarks = '';
-        // Default is empty array
         $column_values = array();
-        // Loop through column values
+
         $first = true;
         foreach ($this->columns as $key => $value) {
             // If this is NOT the first column, add a comma first
@@ -190,25 +163,4 @@ abstract class Repository
         }
         return $model;
     }
-
-    /**
-     * @param $key
-     * @return mixed
-     */
-    public function __get($key)
-    {
-        return $this->columns[$key];
-    }
-
-    /**
-     * Magic method to set all columns.
-     *
-     * @param $key
-     * @param $value
-     */
-    public function __set($key, $value)
-    {
-        $this->columns[$key] = $value;
-    }
-
 }
