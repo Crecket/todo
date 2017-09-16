@@ -2,8 +2,11 @@
 
 namespace Greg\ToDo;
 
-use Greg\ToDo\Exceptions\PageNotFoundException;
-use Greg\ToDo\Factories\RepositoryFactory;
+use Greg\ToDo\Exceptions\Http\BadRequestException;
+use Greg\ToDo\Exceptions\Http\FatalException;
+use Greg\ToDo\Exceptions\Http\PageNotFoundException;
+use Greg\ToDo\Exceptions\Http\PermissionDeniedException;
+use Greg\ToDo\Routing\Router;
 
 class Application
 {
@@ -42,13 +45,10 @@ class Application
 
         $router->get("/test", "TestController::test");
 
-        $router->error(PageNotFoundException::class, function ($twig, $exception) {
-            return $twig->render("error404.twig");
-        });
-
-        $router->error(\Exception::class, function ($twig, $exception) {
-            return $twig->render("error500.twig");
-        })->setStrictMode(false);
+        $router->error(PageNotFoundException::class, "ErrorController::error404");
+        $router->error(PermissionDeniedException::class, "ErrorController::error403");
+        $router->error(BadRequestException::class, "ErrorController::error400");
+        $router->error(\Exception::class, "ErrorController::error500")->setStrictMode(false);
 
         $this->router = $router;
     }

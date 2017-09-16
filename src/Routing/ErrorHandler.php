@@ -1,12 +1,12 @@
 <?php
 
-namespace Greg\ToDo;
+namespace Greg\ToDo\Routing;
 
 class ErrorHandler
 {
     /** @var string $exception */
     public $exception;
-    /** @var callable $callback */
+    /** @var $callback */
     public $callback;
     /** @var boolean $strictMode */
     private $strictMode = true;
@@ -14,9 +14,9 @@ class ErrorHandler
     /**
      * ErrorHandler constructor.
      * @param string $exception
-     * @param callable $callback
+     * @param callable|string $callback
      */
-    public function __construct(string $exception, callable $callback)
+    public function __construct(string $exception, $callback)
     {
         $this->exception = $exception;
         $this->callback = $callback;
@@ -40,13 +40,9 @@ class ErrorHandler
      * @param \Exception $exception
      * @return mixed
      */
-    public function run(\Twig_Environment $twig, $exception)
+    public function run(\Twig_Environment $twig, \Exception $exception)
     {
-        return call_user_func(
-            $this->callback,
-            $twig,
-            $exception
-        );
+        return CallbackHandler::run($this->callback, array($twig));
     }
 
     /**

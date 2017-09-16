@@ -7,34 +7,33 @@ use Greg\ToDo\Factories\RepositoryFactory;
 class HomeController
 {
     /**
-     * @param string $url
      * @param \Twig_Environment $twig
      * @return string
      */
-    public static function home(string $url, \Twig_Environment $twig)
+    public static function home(\Twig_Environment $twig)
     {
         $factory = new RepositoryFactory();
 
         /** @var ToDoRepository $repository */
         $repository = $factory->get("ToDoRepository");
 
-        /** @var ToDo|bool $result */
-        $todo = $repository->find(1);
+        /** @var ToDo[] $result */
+        $todos = $repository->all();
 
         return $twig->render("home.twig", array(
-            "todo" => $todo
+            "todos" => $todos
         ));
     }
 
-    public static function add(string $url, \Twig_Environment $twig)
+    public static function add(\Twig_Environment $twig)
     {
     }
 
-    public static function delete(string $url, \Twig_Environment $twig)
+    public static function delete(\Twig_Environment $twig)
     {
     }
 
-    public static function update(string $url, \Twig_Environment $twig)
+    public static function update(\Twig_Environment $twig)
     {
     }
 }

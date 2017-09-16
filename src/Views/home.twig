@@ -1,5 +1,31 @@
 {% extends 'bootstrap.twig' %}
 
 {% block body %}
-{{ dump(todo|default) }}
+    <div class="container">
+        <ul class="collection with-header">
+            <li class="collection-header">
+                <h4>To-Do</h4>
+            </li>
+
+            {% for todo in todos %}
+                <li class="collection-item avatar">
+                    <i class="material-icons circle">list</i>
+                    <span class="title">{{ todo.title }}</span>
+                    <p>{{ todo.responsible }}</p>
+                    <i>{{ todo.when }}</i>
+
+                    <div class="secondary-content">
+                        <form method="post" action="/delete">
+                            <a class="waves-effect waves-light btn green" href="/update/:id">
+                                <i class="material-icons">mode_edit</i>
+                            </a>
+                            <button class="waves-effect waves-light btn red">
+                                <i class="material-icons">delete</i>
+                            </button>
+                        </form>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}

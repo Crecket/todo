@@ -1,6 +1,6 @@
 <?php
 
-namespace Greg\ToDo\Exceptions;
+namespace Greg\ToDo\Exceptions\Http;
 
 class PageNotFoundException extends \Exception
 {
