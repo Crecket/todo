@@ -40,10 +40,10 @@ class Application
     {
         $router = new Router();
 
-        $router->get("/", "HomeController::home");
-        $router->post("/add", "HomeController::add");
-        $router->post("/delete", "HomeController::delete");
-        $router->post("/update", "HomeController::update");
+        $router->get("/", "ToDoController::home");
+        $router->post("/add", "ToDoController::add");
+        $router->post("/delete", "ToDoController::delete");
+        $router->post("/update", "ToDoController::update");
 
         $router->get("/test", "TestController::test");
 

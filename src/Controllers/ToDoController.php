@@ -4,7 +4,7 @@ namespace Greg\ToDo\Controllers;
 
 use Greg\ToDo\Factories\RepositoryFactory;
 
-class HomeController
+class ToDoController
 {
     /**
      * @param \Twig_Environment $twig
