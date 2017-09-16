@@ -2,22 +2,38 @@
 
 namespace Greg\ToDo;
 
+use Greg\ToDo\Exceptions\PageNotFoundException;
+
 class Router
 {
-    /** @var array $routes */
+    /** @var Route[] $routes */
     private $routes;
+    /** @var array $errorHandlers */
+    private $errorHandlers;
+    /** @var \Twig_Environment $twig */
+    private $twig;
 
-    public function get($route, $callback)
+    public function __construct()
+    {
+        $loader = new \Twig_Loader_Filesystem(__DIR__.'/Views');
+        $this->twig = new \Twig_Environment($loader, array(
+            "debug" => DEBUG
+        ));
+        $this->twig->addExtension(new \Twig_Extension_Debug());
+    }
+
+    public function get(string $route, $callback)
     {
         $this->register($route, "GET", $callback);
     }
 
-    public function post($route, $callback)
+    public function post(string $route, $callback)
     {
         $this->register($route, "POST", $callback);
     }
 
-    public function errorPage($code, $callback){
+    public function errorPage($code, $callback)
+    {
 
     }
 
@@ -26,18 +42,21 @@ class Router
         $this->routes[] = new Route($route, $method, $callback);
     }
 
-    public function start()
+    /**
+     * @return string
+     * @throws PageNotFoundException
+     */
+    public function run()
     {
         $url = $_SERVER["REQUEST_URI"];
 
         /** @var Route $route */
-        foreach($this->routes as $route){
-            $routeResult = $route->match($url);
-            if($routeResult !== false){
-                return $routeResult;
+        foreach ($this->routes as $route) {
+            if ($route->isMatch($url)) {
+                return $route->run($this->twig);
             }
         }
 
-        echo $re
+        throw new PageNotFoundException();
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Greg\ToDo\Repositories;
 
+use Greg\ToDo\Models\ModelInterface;
+
 abstract class Repository
 {
     /** @var \PDO $connection */
@@ -34,6 +36,9 @@ abstract class Repository
         $prepare->bindValue(':value', $value);
         $prepare->execute();
         $row = $prepare->fetch(\PDO::FETCH_ASSOC);
+        if ($row === false) {
+            return false;
+        }
         return $this->mapRowToModel($row);
     }
 
@@ -50,6 +55,9 @@ abstract class Repository
         $prepare->execute();
         if ($single) {
             $row = $prepare->fetch(\PDO::FETCH_ASSOC);
+            if ($row === false) {
+                return false;
+            }
             return $this->mapRowToModel($row);
         }
         $data = $prepare->fetchAll(\PDO::FETCH_ASSOC);
@@ -66,6 +74,12 @@ abstract class Repository
         return $this->mapDataToModel($data);
     }
 
+    /**
+     * @param $model
+     * @return bool|int
+     * @throws \Exception
+     * @deprecated
+     */
     public function update($model)
     {
         $sql = 'UPDATE '.$this->tableName.' SET ';
@@ -102,6 +116,12 @@ abstract class Repository
         return false;
     }
 
+    /**
+     * @param $model
+     * @return bool|int
+     * @throws \Exception
+     * @deprecated
+     */
     public function insert($model)
     {
         $sql = 'INSERT INTO '.$this->tableName.' ( ';
@@ -139,8 +159,8 @@ abstract class Repository
     }
 
     /**
-     * @param $data
-     * @return mixed
+     * @param array $data
+     * @return ModelInterface[]
      */
     private function mapDataToModel($data)
     {
@@ -152,8 +172,8 @@ abstract class Repository
     }
 
     /**
-     * @param $row
-     * @return mixed
+     * @param array $row
+     * @return ModelInterface
      */
     private function mapRowToModel($row)
     {

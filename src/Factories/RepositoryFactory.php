@@ -2,35 +2,31 @@
 
 namespace Greg\ToDo\Factories;
 
-use Greg\ToDo\Exceptions\ClassNotFound;
+use Greg\ToDo\Database;
+use Greg\ToDo\Exceptions\ClassNotFoundException;
 
 class RepositoryFactory
 {
-    /** @var \PDO $connection*/
-    private $connection;
-
     /**
      * RepositoryFactory constructor.
      */
     public function __construct()
     {
-        $dsn = 'mysql:host='.MYSQL_HOSTNAME.';dbname='.MYSQL_DATABASE;
-        $this->connection = new \PDO($dsn, MYSQL_USERNAME, MYSQL_PASSWORD);
     }
 
     /**
      * @param string $repository
      * @return mixed
-     * @throws ClassNotFound
+     * @throws ClassNotFoundException
      */
     public function get(string $repository)
     {
         $className = "Greg\\ToDo\\Repositories\\".$repository;
 
         if(!class_exists($className)){
-            throw new ClassNotFound();
+            throw new ClassNotFoundException();
         }
 
-        return new $className($this->connection);
+        return new $className(Database::$connection);
     }
 }

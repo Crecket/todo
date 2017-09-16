@@ -5,7 +5,7 @@ namespace Greg\ToDo;
 class Route
 {
     /** @var string $route */
-    public $route;
+    public $url;
     /** @var string $method */
     public $method;
     /** @var object|string $callback */
@@ -28,21 +28,32 @@ class Route
      * @param string $url
      * @return bool|mixed
      */
-    public function match(string $url)
+    public function isMatch(string $url)
     {
-        if (!$url === $this->route) {
-            return false;
-        }
+        return $url === $this->url;
+    }
+
+    /**
+     * @param \Twig_Environment $twig
+     * @return mixed
+     */
+    public function run(\Twig_Environment $twig)
+    {
         if (is_callable($this->callback)) {
-            return call_user_func($this->callback, $url);
+            return call_user_func($this->callback, $this->url);
         }
 
-        $callbackSegments = explode(":", $this->callback);
+        $callbackSegments = explode("::", $this->callback);
+        $className = "Greg\\ToDo\\Controllers\\".$callbackSegments[0];
+        $classMethod = $callbackSegments[1];
 
         // create the controller instance using the class string
-        $controller = new $callbackSegments[0];
+        $controller = new $className;
 
         // call the method for the controller object
-        return call_user_func_array(array($controller, $callbackSegments[1]), $url);
+        return call_user_func_array(
+            array($controller, $classMethod),
+            array($this->url, $twig)
+        );
     }
 }

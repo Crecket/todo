@@ -2,7 +2,11 @@
 
 namespace Greg\ToDo\Models;
 
-class ToDo
+/**
+ * @Annotation
+ * @Target({"METHOD","PROPERTY"})
+ */
+class ToDo implements ModelInterface
 {
     /** @var integer $id */
     public $id;
