@@ -5,6 +5,7 @@ namespace Greg\ToDo;
 use Greg\ToDo\Exceptions\Http\BadRequestException;
 use Greg\ToDo\Exceptions\Http\PageNotFoundException;
 use Greg\ToDo\Exceptions\Http\PermissionDeniedException;
+use Greg\ToDo\Http\Response;
 use Greg\ToDo\Http\Router;
 
 class Application
@@ -27,7 +28,9 @@ class Application
      */
     public function run()
     {
-        return $this->router->run();
+        /** @var Response $response */
+        $response = $this->router->run();
+        return $response->output();
     }
 
     /**

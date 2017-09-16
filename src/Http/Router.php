@@ -97,7 +97,8 @@ class Router
             foreach ($this->routes as $route) {
                 $routeMatcher = new RouteMatcher($url, $method);
                 if ($route->isMatch($routeMatcher)) {
-                    return $route->run($this->twig);
+                    $response = $route->run($this->twig);
+                    return $this->finish($response);
                 }
             }
 
@@ -106,12 +107,25 @@ class Router
             /** @var ErrorHandler $errorHandler */
             foreach ($this->errorHandlers as $errorHandler) {
                 if ($errorHandler->isMatch($exception)) {
-                    return $errorHandler->run($this->twig, $exception);
+                    $response = $errorHandler->run($this->twig, $exception);
+                    return $this->finish($response);
                 }
             }
 
             // rethrow Exception if no matches are found
             throw $exception;
         }
+    }
+
+    /**
+     * @param Response|string $response
+     * @return Response
+     */
+    private function finish($response)
+    {
+        if (!$response instanceof Response) {
+            return new Response($response);
+        }
+        return $response;
     }
 }
