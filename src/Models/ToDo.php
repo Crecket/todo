@@ -18,4 +18,12 @@ class ToDo implements ModelInterface
     public $when;
     /** @var \DateTime $added */
     public $added;
+
+    /**
+     * @return int
+     */
+    public function primary()
+    {
+        return $this->id;
+    }
 }

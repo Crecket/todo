@@ -20,7 +20,7 @@ class Application
     {
         Database::connect();
 
-        $this->registerRoutes();
+        $this->router = $this->registerRoutes();
     }
 
     /**
@@ -34,7 +34,7 @@ class Application
     }
 
     /**
-     *
+     * @return Router
      */
     private function registerRoutes()
     {
@@ -52,7 +52,7 @@ class Application
         $router->error(BadRequestException::class, "ErrorController::error400");
         $router->error(\Exception::class, "ErrorController::error500")->setStrictMode(false);
 
-        $this->router = $router;
+        return $router;
     }
 
 }

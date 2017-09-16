@@ -6,15 +6,13 @@ use Greg\ToDo\Models\ModelInterface;
 
 abstract class Repository
 {
+    const TABLE_NAME = "";
+    const PRIMARY_KEY = "id";
+
     /** @var \PDO $connection */
     protected $connection;
     /** @var string $modelName */
     protected $modelName = "";
-    /** @var string $tableName */
-    protected $tableName = "";
-    /** @var string $primaryKey */
-    protected $primaryKey = "id";
-
     /**
      * Repository constructor.
      * @param \PDO $connection
@@ -31,7 +29,11 @@ abstract class Repository
      */
     public function find($value)
     {
-        $sql = 'SELECT * FROM '.$this->tableName.' WHERE '.$this->primaryKey.' = :value';
+        if ($value instanceof ModelInterface) {
+            $value = $value->primary();
+        }
+
+        $sql = 'SELECT * FROM '.static::TABLE_NAME.' WHERE '.static::PRIMARY_KEY.' = :value';
         $prepare = $this->connection->prepare($sql);
         $prepare->bindValue(':value', $value);
         $prepare->execute();
@@ -50,9 +52,14 @@ abstract class Repository
      */
     public function findBy(string $key, $value, $single = false)
     {
-        $prepare = $this->connection->prepare('SELECT * FROM '.$this->tableName.' WHERE '.$key.' = :value');
+        if ($value instanceof ModelInterface) {
+            $value = $value->primary();
+        }
+
+        $prepare = $this->connection->prepare('SELECT * FROM '.static::TABLE_NAME.' WHERE '.$key.' = :value');
         $prepare->bindValue(':value', $value);
         $prepare->execute();
+
         if ($single) {
             $row = $prepare->fetch(\PDO::FETCH_ASSOC);
             if ($row === false) {
@@ -60,6 +67,7 @@ abstract class Repository
             }
             return $this->mapRowToModel($row);
         }
+
         $data = $prepare->fetchAll(\PDO::FETCH_ASSOC);
         return $this->mapDataToModel($data);
     }
@@ -69,7 +77,7 @@ abstract class Repository
      */
     public function all()
     {
-        $prepare = $this->connection->query('SELECT * FROM '.$this->tableName);
+        $prepare = $this->connection->query('SELECT * FROM '.static::TABLE_NAME);
         $data = $prepare->fetchAll(\PDO::FETCH_ASSOC);
         return $this->mapDataToModel($data);
     }
@@ -82,7 +90,7 @@ abstract class Repository
      */
     public function update($model)
     {
-        $sql = 'UPDATE '.$this->tableName.' SET ';
+        $sql = 'UPDATE '.static::TABLE_NAME.' SET ';
 
         $column_values = array();
 
@@ -99,9 +107,9 @@ abstract class Repository
             $column_values[] = $value;
         }
 
-        $sql .= ' WHERE '.$this->primaryKey.' = ?';
+        $sql .= ' WHERE '.static::PRIMARY_KEY.' = ?';
 
-        $column_values[] = $this->columns[$this->primaryKey];
+        $column_values[] = $this->columns[static::PRIMARY_KEY];
 
         try {
             $prepare = $this->connection->prepare($sql);
@@ -124,7 +132,7 @@ abstract class Repository
      */
     public function insert($model)
     {
-        $sql = 'INSERT INTO '.$this->tableName.' ( ';
+        $sql = 'INSERT INTO '.static::TABLE_NAME.' ( ';
         $sql_questionmarks = '';
         $column_values = array();
 
