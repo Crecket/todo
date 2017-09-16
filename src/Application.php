@@ -3,10 +3,9 @@
 namespace Greg\ToDo;
 
 use Greg\ToDo\Exceptions\Http\BadRequestException;
-use Greg\ToDo\Exceptions\Http\FatalException;
 use Greg\ToDo\Exceptions\Http\PageNotFoundException;
 use Greg\ToDo\Exceptions\Http\PermissionDeniedException;
-use Greg\ToDo\Routing\Router;
+use Greg\ToDo\Http\Router;
 
 class Application
 {

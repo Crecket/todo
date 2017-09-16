@@ -1,6 +1,6 @@
 <?php
 
-namespace Greg\ToDo\Routing;
+namespace Greg\ToDo\Http;
 
 class CallbackHandler
 {
