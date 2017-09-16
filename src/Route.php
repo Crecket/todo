@@ -6,31 +6,32 @@ class Route
 {
     /** @var string $route */
     public $url;
-    /** @var string $method */
-    public $method;
+    /** @var array $methods */
+    public $methods;
     /** @var object|string $callback */
     public $callback;
 
     /**
      * Route constructor.
      * @param string $url
-     * @param string $method
+     * @param array $methods
      * @param object|string $callback
      */
-    public function __construct(string $url, string $method = "GET", $callback)
+    public function __construct(string $url, array $methods, $callback)
     {
         $this->url = $url;
-        $this->method = $method;
+        $this->methods = $methods;
         $this->callback = $callback;
     }
 
     /**
      * @param string $url
+     * @param string $method
      * @return bool|mixed
      */
-    public function isMatch(string $url)
+    public function isMatch(string $url, string $method)
     {
-        return $url === $this->url;
+        return $url === $this->url && in_array($method, $this->methods);
     }
 
     /**
@@ -40,7 +41,11 @@ class Route
     public function run(\Twig_Environment $twig)
     {
         if (is_callable($this->callback)) {
-            return call_user_func($this->callback, $this->url);
+            return call_user_func(
+                $this->callback,
+                $this->url,
+                $twig
+            );
         }
 
         $callbackSegments = explode("::", $this->callback);

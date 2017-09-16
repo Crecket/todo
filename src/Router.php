@@ -8,11 +8,14 @@ class Router
 {
     /** @var Route[] $routes */
     private $routes;
-    /** @var array $errorHandlers */
+    /** @var ErrorHandler[] $errorHandlers */
     private $errorHandlers;
     /** @var \Twig_Environment $twig */
     private $twig;
 
+    /**
+     * Router constructor.
+     */
     public function __construct()
     {
         $loader = new \Twig_Loader_Filesystem(__DIR__.'/Views');
@@ -22,41 +25,82 @@ class Router
         $this->twig->addExtension(new \Twig_Extension_Debug());
     }
 
-    public function get(string $route, $callback)
+    /**
+     * @param string $route
+     * @param array $methods
+     * @param $callback
+     * @return Route|string
+     */
+    public function add(string $route, array $methods, $callback)
     {
-        $this->register($route, "GET", $callback);
-    }
-
-    public function post(string $route, $callback)
-    {
-        $this->register($route, "POST", $callback);
-    }
-
-    public function errorPage($code, $callback)
-    {
-
-    }
-
-    private function register(string $route, string $method, $callback)
-    {
-        $this->routes[] = new Route($route, $method, $callback);
+        return $this->register($route, $methods, $callback);
     }
 
     /**
-     * @return string
-     * @throws PageNotFoundException
+     * @param string $route
+     * @param $callback
+     * @return Route|string
      */
+    public function get(string $route, $callback)
+    {
+        return $this->register($route, array("GET"), $callback);
+    }
+
+    /**
+     * @param string $route
+     * @param $callback
+     * @return Route|string
+     */
+    public function post(string $route, $callback)
+    {
+        return $this->register($route, array("POST"), $callback);
+    }
+
+    public function error(string $exception, callable $callback)
+    {
+        $errorHandler = new ErrorHandler($exception, $callback);
+        $this->errorHandlers[] = $errorHandler;
+        return $errorHandler;
+    }
+
+    /**
+     * @param string $route
+     * @param array $methods
+     * @param $callback
+     * @return Route|string
+     */
+    private function register(string $route, array $methods, $callback)
+    {
+        $route = new Route($route, $methods, $callback);
+        $this->routes[] = $route;
+        return $route;
+    }
+
     public function run()
     {
         $url = $_SERVER["REQUEST_URI"];
+        $method = $_SERVER["REQUEST_METHOD"];
 
-        /** @var Route $route */
-        foreach ($this->routes as $route) {
-            if ($route->isMatch($url)) {
-                return $route->run($this->twig);
+        try {
+            /** @var Route $route */
+            foreach ($this->routes as $route) {
+                if ($route->isMatch($url, $method)) {
+                    return $route->run($this->twig);
+                }
             }
-        }
 
-        throw new PageNotFoundException();
+            throw new PageNotFoundException();
+        } catch (\Exception $exception) {
+
+            /** @var Route $route */
+            foreach ($this->errorHandlers as $errorHandler) {
+                if ($errorHandler->isMatch($exception)) {
+                    return $errorHandler->run($this->twig, $exception);
+                }
+            }
+
+            // rethrow Exception if no matches are found
+            throw $exception;
+        }
     }
 }

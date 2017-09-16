@@ -13,7 +13,6 @@ class HomeController
      */
     public static function home(string $url, \Twig_Environment $twig)
     {
-
         $factory = new RepositoryFactory();
 
         /** @var ToDoRepository $repository */
@@ -25,5 +24,17 @@ class HomeController
         return $twig->render("home.twig", array(
             "todo" => $todo
         ));
+    }
+
+    public static function add(string $url, \Twig_Environment $twig)
+    {
+    }
+
+    public static function delete(string $url, \Twig_Environment $twig)
+    {
+    }
+
+    public static function update(string $url, \Twig_Environment $twig)
+    {
     }
 }
