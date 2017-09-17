@@ -105,6 +105,12 @@ class Router
                 $routeMatcher = new RouteMatcher($url, $method);
                 if ($route->isMatch($routeMatcher)) {
                     $response = $route->run($this->twig);
+
+                    if ($response instanceof Redirect) {
+                        $response->redirect();
+                        exit;
+                    }
+
                     return $this->finish($response);
                 }
             }
@@ -115,6 +121,12 @@ class Router
             foreach ($this->errorHandlers as $errorHandler) {
                 if ($errorHandler->isMatch($exception)) {
                     $response = $errorHandler->run($this->twig, $exception);
+
+                    if ($response instanceof Redirect) {
+                        $response->redirect();
+                        exit;
+                    }
+
                     return $this->finish($response);
                 }
             }

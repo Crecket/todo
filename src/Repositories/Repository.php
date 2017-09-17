@@ -87,87 +87,91 @@ abstract class Repository
     }
 
     /**
-     * @param $model
-     * @return bool|int
-     * @throws \Exception
-     * @deprecated
+     * @param ModelInterface $model
+     * @return int
      */
-    public function update($model)
+    public function delete(ModelInterface $model)
     {
-        $sql = 'UPDATE '.static::TABLE_NAME.' SET ';
+        $sql = 'DELETE FROM '.static::TABLE_NAME.' WHERE '.static::PRIMARY_KEY.' = :value';
 
-        $column_values = array();
+        $prepare = $this->database->connection->prepare($sql);
+        $prepare->bindValue(':value', $model->primary());
+        $prepare->execute();
 
-        $first = true;
-        foreach ($this->columns as $key => $value) {
-            // If this is NOT the first column, add a comma first
-            if (!$first) {
-                $sql .= ', ';
-            }
-            $first = false;
-
-            $sql .= $key.' = ?';
-
-            $column_values[] = $value;
-        }
-
-        $sql .= ' WHERE '.static::PRIMARY_KEY.' = ?';
-
-        $column_values[] = $this->columns[static::PRIMARY_KEY];
-
-        try {
-            $prepare = $this->database->connection->prepare($sql);
-            $prepare->execute($column_values);
-            return $prepare->rowcount();
-        } catch (\Exception $ex) {
-            if (DEBUG) {
-                throw $ex;
-            }
-            return false;
-        }
-        return false;
+        return $prepare->rowCount();
     }
 
     /**
-     * @param $model
-     * @return bool|int
-     * @throws \Exception
-     * @deprecated
+     * @param ModelInterface $model
+     * @return int
      */
-    public function insert($model)
+    public function insert(ModelInterface $model)
     {
         $sql = 'INSERT INTO '.static::TABLE_NAME.' ( ';
         $sql_questionmarks = '';
         $column_values = array();
 
+        // get all properties from the model
+        $properties = get_object_vars($model);
+
         $first = true;
-        foreach ($this->columns as $key => $value) {
-            // If this is NOT the first column, add a comma first
+        foreach ($properties as $columnName => $columnValue) {
+            if (is_null($columnValue)) {
+                continue;
+            }
+
             if (!$first) {
                 $sql .= ', ';
                 $sql_questionmarks .= ', ';
             }
             $first = false;
-            // Add the column name to the query
-            $sql .= $key;
-            // Add a question mark
+
+            $sql .= "`".$columnName."`";
             $sql_questionmarks .= ' ?';
-            // Storre the value in the list
-            $column_values[] = $value;
+
+            $column_values[] = $columnValue;
         }
-        // Set the where clause using the primary
         $sql .= ') VALUES ('.$sql_questionmarks.')';
-        try {
-            // Prepare the statement
-            $prepare = $this->database->connection->prepare($sql);
-            // Attempt to execute the query
-            $prepare->execute($column_values);
-            // Return the resulting rowcount
-            return $prepare->rowcount();
-        } catch (\Exception $ex) {
-            return false;
+
+        $prepare = $this->database->connection->prepare($sql);
+        $prepare->execute($column_values);
+        return $prepare->rowcount();
+    }
+
+    /**
+     * @param ModelInterface $model
+     * @return int
+     */
+    public function update(ModelInterface $model)
+    {
+        $sql = 'UPDATE '.static::TABLE_NAME.' SET ';
+        $column_values = array();
+
+        // get all properties from the model
+        $properties = get_object_vars($model);
+
+        $first = true;
+        foreach ($properties as $columnName => $columnValue) {
+            if ($columnName === static::PRIMARY_KEY) {
+                continue;
+            }
+
+            if (!$first) {
+                $sql .= ', ';
+            }
+            $first = false;
+
+            $sql .= "`".$columnName.'` = ?';
+
+            $column_values[] = $columnValue;
         }
-        return false;
+
+        $sql .= ' WHERE `'.static::PRIMARY_KEY.'` = ?';
+        $column_values[] = $model->primary();
+
+        $prepare = $this->database->connection->prepare($sql);
+        $prepare->execute($column_values);
+        return $prepare->rowcount();
     }
 
     /**

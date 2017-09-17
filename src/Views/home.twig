@@ -16,16 +16,109 @@
 
                     <div class="secondary-content">
                         <form method="post" action="/delete">
-                            <a class="waves-effect waves-light btn green" href="/update/:id">
+                            <input type="hidden" name="id" value="{{ todo.id }}">
+                            <a class="waves-effect waves-light btn green modal-trigger" href="#modal{{ todo.id }}">
                                 <i class="material-icons">mode_edit</i>
                             </a>
-                            <button class="waves-effect waves-light btn red">
+
+                            <button class="waves-effect waves-light btn red tooltipped"
+                                    data-position="top" data-delay="50" data-tooltip="Remove this item">
                                 <i class="material-icons">delete</i>
                             </button>
                         </form>
                     </div>
+
+                    <div id="modal{{ todo.id }}" class="modal">
+                        <form method="post" action="/update">
+                            <input type="hidden" name="id" value="{{ todo.id }}">
+
+                            <div class="modal-content">
+                                <h4>Update ToDo</h4>
+
+                                <div class="row">
+                                    <div class="input-field col s12">
+                                        <input id="title" type="text" name="title" class="validate"
+                                               value="{{ todo.title }}">
+                                        <label for="title">Title</label>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="input-field col s12">
+                                        <input id="responsible" type="text" name="responsible"
+                                               class="validate" value="{{ todo.responsible }}">
+                                        <label for="responsible">Responsible</label>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="input-field col s12">
+                                        <input id="when" name="when" type="datetime-local" class="validate"
+                                               value="{{ todo.when|date("Y-m-d\\TH:i") }}" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button class="modal-action modal-close waves-effect waves-green btn-flat green">
+                                    Update
+                                </button>
+                                <a class="modal-action modal-close waves-effect waves-red btn-flat">Cancel</a>
+                            </div>
+
+                        </form>
+                    </div>
+
                 </li>
             {% endfor %}
         </ul>
+
+        <div class="card darken-1">
+            <form method="post" action="/add">
+                <div class="card-content">
+                    <span class="card-title">New ToDo item</span>
+
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input id="title" name="title" type="text" class="validate" required>
+                            <label for="title">Title</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input id="responsible" name="responsible" type="text" class="validate" required>
+                            <label for="responsible">Responsible</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input id="when" name="when" type="datetime-local" class="validate" required>
+                            {#<label for="when">When</label>#}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-action">
+                    <button class="modal-action modal-close waves-effect waves-green btn-flat green">
+                        Create
+                    </button>
+                </div>
+            </form>
+        </div>
+
+
     </div>
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script async defer>
+        $('.modal').modal();
+        $('.datepicker').pickadate();
+        $('.timepicker').pickatime({
+            twelvehour: false
+        });
+    </script>
 {% endblock %}
