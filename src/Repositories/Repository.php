@@ -2,6 +2,7 @@
 
 namespace Greg\ToDo\Repositories;
 
+use Greg\ToDo\Database;
 use Greg\ToDo\Models\ModelInterface;
 
 abstract class Repository
@@ -9,17 +10,18 @@ abstract class Repository
     const TABLE_NAME = "";
     const PRIMARY_KEY = "id";
 
-    /** @var \PDO $connection */
-    protected $connection;
+    /** @var Database $database */
+    protected $database;
     /** @var string $modelName */
     protected $modelName = "";
+
     /**
      * Repository constructor.
-     * @param \PDO $connection
+     * @param Database $database
      */
-    public function __construct(\PDO $connection)
+    public function __construct(Database $database)
     {
-        $this->connection = $connection;
+        $this->database = $database;
     }
 
     /**
@@ -34,10 +36,12 @@ abstract class Repository
         }
 
         $sql = 'SELECT * FROM '.static::TABLE_NAME.' WHERE '.static::PRIMARY_KEY.' = :value';
-        $prepare = $this->connection->prepare($sql);
+
+        $prepare = $this->database->connection->prepare($sql);
         $prepare->bindValue(':value', $value);
         $prepare->execute();
         $row = $prepare->fetch(\PDO::FETCH_ASSOC);
+
         if ($row === false) {
             return false;
         }
@@ -56,7 +60,7 @@ abstract class Repository
             $value = $value->primary();
         }
 
-        $prepare = $this->connection->prepare('SELECT * FROM '.static::TABLE_NAME.' WHERE '.$key.' = :value');
+        $prepare = $this->database->connection->prepare('SELECT * FROM '.static::TABLE_NAME.' WHERE '.$key.' = :value');
         $prepare->bindValue(':value', $value);
         $prepare->execute();
 
@@ -77,7 +81,7 @@ abstract class Repository
      */
     public function all()
     {
-        $prepare = $this->connection->query('SELECT * FROM '.static::TABLE_NAME);
+        $prepare = $this->database->connection->query('SELECT * FROM '.static::TABLE_NAME);
         $data = $prepare->fetchAll(\PDO::FETCH_ASSOC);
         return $this->mapDataToModel($data);
     }
@@ -112,7 +116,7 @@ abstract class Repository
         $column_values[] = $this->columns[static::PRIMARY_KEY];
 
         try {
-            $prepare = $this->connection->prepare($sql);
+            $prepare = $this->database->connection->prepare($sql);
             $prepare->execute($column_values);
             return $prepare->rowcount();
         } catch (\Exception $ex) {
@@ -155,7 +159,7 @@ abstract class Repository
         $sql .= ') VALUES ('.$sql_questionmarks.')';
         try {
             // Prepare the statement
-            $prepare = $this->connection->prepare($sql);
+            $prepare = $this->database->connection->prepare($sql);
             // Attempt to execute the query
             $prepare->execute($column_values);
             // Return the resulting rowcount

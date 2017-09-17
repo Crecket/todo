@@ -25,8 +25,6 @@ class Application
     {
         $this->config = $this->loadConfig();
 
-        Database::connect($this->config);
-
         $this->container = new Container($this->config);
 
         $this->router = $this->registerRoutes();
@@ -57,7 +55,7 @@ class Application
      */
     private function registerRoutes()
     {
-        $router = new Router($this->config);
+        $router = new Router($this->container);
 
         $router->get("/", "ToDoController::home");
         $router->post("/add", "ToDoController::add");

@@ -3,6 +3,7 @@
 namespace Greg\ToDo\Http;
 
 use Greg\ToDo\Config;
+use Greg\ToDo\DependencyInjection\Container;
 use Greg\ToDo\Exceptions\Http\PageNotFoundException;
 
 class Router
@@ -13,20 +14,20 @@ class Router
     private $errorHandlers;
     /** @var \Twig_Environment $twig */
     private $twig;
-    /** @var Config $config */
-    private $config;
+    /** @var Container $container */
+    private $container;
 
     /**
      * Router constructor.
-     * @param Config $config
+     * @param Container $container
      */
-    public function __construct(Config $config)
+    public function __construct(Container $container)
     {
-        $this->config = $config;
+        $this->container = $container;
 
         $loader = new \Twig_Loader_Filesystem(__DIR__.'/../Views');
         $this->twig = new \Twig_Environment($loader, array(
-            "debug" => $this->config->get('debug')
+            "debug" => $this->container->getConfig()->get('debug')
         ));
         $this->twig->addExtension(new \Twig_Extension_Debug());
     }
@@ -69,7 +70,7 @@ class Router
      */
     public function error(string $exception, $callback)
     {
-        $errorHandler = new ErrorHandler($this->config, $exception, $callback);
+        $errorHandler = new ErrorHandler($this->container, $exception, $callback);
         $this->errorHandlers[] = $errorHandler;
         return $errorHandler;
     }
@@ -82,7 +83,7 @@ class Router
      */
     private function register(string $route, array $methods, $callback)
     {
-        $route = new Route($this->config, $route, $methods, $callback);
+        $route = new Route($this->container, $route, $methods, $callback);
         $this->routes[] = $route;
         return $route;
     }

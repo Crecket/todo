@@ -7,7 +7,7 @@ use Greg\ToDo\Http\Response;
 class ErrorController
 {
 
-    public static function error500(\Twig_Environment $twig)
+    public static function error500(\Twig_Environment $twig, \Exception $exception)
     {
         return new Response($twig->render("errors/error500.twig"), 500);
     }

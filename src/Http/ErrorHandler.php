@@ -2,12 +2,12 @@
 
 namespace Greg\ToDo\Http;
 
-use Greg\ToDo\Config;
+use Greg\ToDo\DependencyInjection\Container;
 
 class ErrorHandler
 {
-    /** @var Config $config */
-    public $config;
+    /** @var Container $container */
+    public $container;
     /** @var string $exception */
     public $exception;
     /** @var $callback */
@@ -17,12 +17,13 @@ class ErrorHandler
 
     /**
      * ErrorHandler constructor.
-     * @param Config $config
+     * @param Container $container
      * @param string $exception
      * @param callable|string $callback
      */
-    public function __construct(Config $config, string $exception, $callback)
+    public function __construct(Container $container, string $exception, $callback)
     {
+        $this->container = $container;
         $this->exception = $exception;
         $this->callback = $callback;
     }
@@ -47,7 +48,7 @@ class ErrorHandler
      */
     public function run(\Twig_Environment $twig, \Exception $exception)
     {
-        $callbackHandler = new CallbackHandler($this->config);
+        $callbackHandler = new CallbackHandler($this->container);
         return $callbackHandler->run($this->callback, array($twig, $exception));
     }
 

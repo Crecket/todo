@@ -2,20 +2,20 @@
 
 namespace Greg\ToDo\Http;
 
-use Greg\ToDo\Config;
+use Greg\ToDo\DependencyInjection\Container;
 
 class CallbackHandler
 {
-    /** @var Config $config */
-    private $config;
+    /** @var Container $container */
+    private $container;
 
     /**
      * CallbackHandler constructor.
-     * @param Config $config
+     * @param Container $container
      */
-    public function __construct(Config $config)
+    public function __construct(Container $container)
     {
-        $this->config = $config;
+        $this->container = $container;
     }
 
     /**
@@ -37,7 +37,7 @@ class CallbackHandler
         $classMethod = $callbackSegments[1];
 
         // create the controller instance using the class string
-        $controller = new $className();
+        $controller = new $className($this->container);
 
         // call the method for the controller object
         return call_user_func_array(

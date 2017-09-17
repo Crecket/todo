@@ -10,6 +10,8 @@ class Container
 {
     /** @var Config $config */
     private $config;
+    /** @var array $singletons */
+    private $singletons;
 
     /**
      * Container constructor.
@@ -28,33 +30,35 @@ class Container
      */
     public function get(string $id)
     {
-        $service = $this->config->getService($id);
+        $serviceInfo = $this->config->getService($id);
+        $service = new Service($this->config, $this, $serviceInfo);
 
-        $parameterValues = [];
-
-        if (!empty($service['parameters'])) {
-            $parameters = $service['parameters'];
-            $parameterValues = $this->getParameterValues($parameters);
+        if (!$service->isSingleton()) {
+            return $service->createInstance();
         }
 
-        if (!class_exists($service['class'])) {
-            throw new ClassNotFoundException();
+        if (!empty($this->singletons[$service->getClass()])) {
+            return $this->singletons[$service->getClass()];
         }
 
-        // create the object instance and unpack parameter values in constructor
-        return new $service['class'](...$parameterValues);
+        $instance = $service->createInstance();
+        $this->singletons[$service->getClass()] = $instance;
+        return $instance;
     }
 
     /**
-     * @param array $parameters
-     * @return array
+     * @return Config
      */
-    private function getParameterValues(array $parameters)
+    public function getConfig(): Config
     {
-        $parameterValues = [];
-        foreach ($parameters as $parameter) {
-            $parameterValues[$parameter] = $this->config->getParameter($parameter);
-        }
-        return $parameterValues;
+        return $this->config;
+    }
+
+    /**
+     * @param Config $config
+     */
+    public function setConfig(Config $config)
+    {
+        $this->config = $config;
     }
 }

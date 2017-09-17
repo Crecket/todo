@@ -2,20 +2,16 @@
 
 namespace Greg\ToDo\Controllers;
 
-use Greg\ToDo\Factories\RepositoryFactory;
-
-class ToDoController
+class ToDoController extends Controller
 {
     /**
      * @param \Twig_Environment $twig
      * @return string
      */
-    public static function home(\Twig_Environment $twig)
+    public function home(\Twig_Environment $twig)
     {
-        $factory = new RepositoryFactory();
-
         /** @var ToDoRepository $repository */
-        $repository = $factory->get("ToDoRepository");
+        $repository = $this->container->get("repositories.todo_repository");
 
         /** @var ToDo[] $result */
         $todos = $repository->all();
@@ -25,15 +21,15 @@ class ToDoController
         ));
     }
 
-    public static function add(\Twig_Environment $twig)
+    public function add(\Twig_Environment $twig)
     {
     }
 
-    public static function delete(\Twig_Environment $twig)
+    public function delete(\Twig_Environment $twig)
     {
     }
 
-    public static function update(\Twig_Environment $twig)
+    public function update(\Twig_Environment $twig)
     {
     }
 }

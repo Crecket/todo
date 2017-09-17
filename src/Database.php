@@ -5,18 +5,45 @@ namespace Greg\ToDo;
 class Database
 {
     /** @var \PDO */
-    public static $connection;
+    public $connection;
+    /** @var string */
+    private $hostname;
+    /** @var int */
+    private $port;
+    /** @var string */
+    private $database_name;
+    /** @var string */
+    private $username;
+    /** @var string */
+    private $password;
 
     /**
-     * @param Config $config
+     * Database constructor.
+     * @param string $hostname
+     * @param int $port
+     * @param string $database_name
+     * @param string $username
+     * @param string $password
      */
-    public static function connect(Config $config)
-    {
-        $dsn = 'mysql:host='.$config->getParameter("database_host").';dbname='.$config->getParameter("database_name");
-        self::$connection = new \PDO(
+    public function __construct(
+        string $hostname,
+        int $port,
+        string $database_name,
+        string $username,
+        string $password
+    ) {
+        $this->hostname = $hostname;
+        $this->port = $port;
+        $this->database_name = $database_name;
+        $this->username = $username;
+        $this->password = $password;
+
+        $dsn = 'mysql:host='.$this->hostname.';dbname='.$this->database_name;
+
+        $this->connection = new \PDO(
             $dsn,
-            $config->getParameter("database_user"),
-            $config->getParameter("database_password")
+            $this->username,
+            $this->password
         );
     }
 }

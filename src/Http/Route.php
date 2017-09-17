@@ -2,12 +2,12 @@
 
 namespace Greg\ToDo\Http;
 
-use Greg\ToDo\Config;
+use Greg\ToDo\DependencyInjection\Container;
 
 class Route
 {
-    /** @var Config $config */
-    public $config;
+    /** @var Container $container */
+    public $container;
     /** @var string $route */
     public $url;
     /** @var array $methods */
@@ -17,14 +17,14 @@ class Route
 
     /**
      * Route constructor.
-     * @param Config $config
+     * @param Container $container
      * @param string $url
      * @param array $methods
      * @param object|string $callback
      */
-    public function __construct(Config $config, string $url, array $methods, $callback)
+    public function __construct(Container $container, string $url, array $methods, $callback)
     {
-        $this->config = $config;
+        $this->container = $container;
         $this->url = $url;
         $this->methods = $methods;
         $this->callback = $callback;
@@ -45,7 +45,7 @@ class Route
      */
     public function run(\Twig_Environment $twig)
     {
-        $callbackHandler = new CallbackHandler($this->config);
+        $callbackHandler = new CallbackHandler($this->container);
         return $callbackHandler->run($this->callback, array($twig));
     }
 }
