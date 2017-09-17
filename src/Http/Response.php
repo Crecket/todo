@@ -8,11 +8,11 @@ use Greg\ToDo\Exceptions\Http\InvalidHeaderStringException;
 class Response
 {
     /** @var string $body */
-    private $body;
+    private $body = null;
     /** @var int $code */
-    private $code;
+    private $code = 200;
     /** @var Header[] $headers */
-    private $headers;
+    private $headers = [];
 
     /**
      * Response constructor.
@@ -20,7 +20,7 @@ class Response
      * @param int $code
      * @param array $headers
      */
-    public function __construct(string $body, int $code = 200, array $headers = array())
+    public function __construct(string $body = null, int $code = 200, array $headers = array())
     {
         $this->body = $body;
         $this->code = $code;
@@ -46,12 +46,12 @@ class Response
     /**
      * @throws InvalidHeaderException
      */
-    private function parseHeaders()
+    private function parseHeaders($headers)
     {
-        $headers = [];
-        foreach ($this->headers as $header) {
+        $parsedHeaders = [];
+        foreach ($headers as $header) {
             if ($header instanceof Header) {
-                $headers[] = $header;
+                $parsedHeaders[] = $header;
                 continue;
             }
 
@@ -68,18 +68,18 @@ class Response
                 // implode back into a string in case value contained more : characters
                 $headerValue = implode(":", $headerParts);
 
-                $headers[] = new Header($headerType, $headerValue);
+                $parsedHeaders[] = new Header($headerType, $headerValue);
                 continue;
             }
 
             if (is_array($header)) {
-                $headers[] = new Header($header[0], $header[1]);
+                $parsedHeaders[] = new Header($header[0], $header[1]);
                 continue;
             }
 
             throw new InvalidHeaderException();
         }
-        return $headers;
+        return $parsedHeaders;
     }
 
     /**
