@@ -2,14 +2,28 @@
 
 namespace Greg\ToDo\Http;
 
+use Greg\ToDo\Config;
+
 class CallbackHandler
 {
+    /** @var Config $config */
+    private $config;
+
+    /**
+     * CallbackHandler constructor.
+     * @param Config $config
+     */
+    public function __construct(Config $config)
+    {
+        $this->config = $config;
+    }
+
     /**
      * @param $callback
      * @param array $parameters
      * @return mixed
      */
-    public static function run($callback, array $parameters)
+    public function run($callback, array $parameters)
     {
         if (is_callable($callback)) {
             return call_user_func_array(
@@ -23,7 +37,7 @@ class CallbackHandler
         $classMethod = $callbackSegments[1];
 
         // create the controller instance using the class string
-        $controller = new $className;
+        $controller = new $className();
 
         // call the method for the controller object
         return call_user_func_array(

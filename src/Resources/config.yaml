@@ -1,0 +1,6 @@
+imports:
+    - parameters.yaml
+    - services.yaml
+
+debug: true
+cache_dir: 'cache'

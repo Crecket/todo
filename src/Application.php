@@ -2,6 +2,7 @@
 
 namespace Greg\ToDo;
 
+use Greg\ToDo\DependencyInjection\Container;
 use Greg\ToDo\Exceptions\Http\BadRequestException;
 use Greg\ToDo\Exceptions\Http\PageNotFoundException;
 use Greg\ToDo\Exceptions\Http\PermissionDeniedException;
@@ -10,15 +11,23 @@ use Greg\ToDo\Http\Router;
 
 class Application
 {
-    /** @var Router */
+    /** @var Router $router */
     private $router;
+    /** @var Config $config */
+    private $config;
+    /** @var Container $container */
+    private $container;
 
     /**
      * Application constructor.
      */
     public function __construct()
     {
-        Database::connect();
+        $this->config = $this->loadConfig();
+
+        Database::connect($this->config);
+
+        $this->container = new Container($this->config);
 
         $this->router = $this->registerRoutes();
     }
@@ -34,11 +43,21 @@ class Application
     }
 
     /**
+     * @param string $configFile
+     * @return array|mixed
+     */
+    private function loadConfig(string $configFile = 'config.yaml')
+    {
+        $configLoader = new ConfigLoader(__DIR__."/Resources/");
+        return $configLoader->load($configFile);
+    }
+
+    /**
      * @return Router
      */
     private function registerRoutes()
     {
-        $router = new Router();
+        $router = new Router($this->config);
 
         $router->get("/", "ToDoController::home");
         $router->post("/add", "ToDoController::add");

@@ -7,9 +7,16 @@ class Database
     /** @var \PDO */
     public static $connection;
 
-    public static function connect()
+    /**
+     * @param Config $config
+     */
+    public static function connect(Config $config)
     {
-        $dsn = 'mysql:host='.MYSQL_HOSTNAME.';dbname='.MYSQL_DATABASE;
-        self::$connection = new \PDO($dsn, MYSQL_USERNAME, MYSQL_PASSWORD);
+        $dsn = 'mysql:host='.$config->getParameter("database_host").';dbname='.$config->getParameter("database_name");
+        self::$connection = new \PDO(
+            $dsn,
+            $config->getParameter("database_user"),
+            $config->getParameter("database_password")
+        );
     }
 }

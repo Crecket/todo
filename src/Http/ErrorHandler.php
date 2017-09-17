@@ -2,8 +2,12 @@
 
 namespace Greg\ToDo\Http;
 
+use Greg\ToDo\Config;
+
 class ErrorHandler
 {
+    /** @var Config $config */
+    public $config;
     /** @var string $exception */
     public $exception;
     /** @var $callback */
@@ -13,10 +17,11 @@ class ErrorHandler
 
     /**
      * ErrorHandler constructor.
+     * @param Config $config
      * @param string $exception
      * @param callable|string $callback
      */
-    public function __construct(string $exception, $callback)
+    public function __construct(Config $config, string $exception, $callback)
     {
         $this->exception = $exception;
         $this->callback = $callback;
@@ -42,7 +47,8 @@ class ErrorHandler
      */
     public function run(\Twig_Environment $twig, \Exception $exception)
     {
-        return CallbackHandler::run($this->callback, array($twig));
+        $callbackHandler = new CallbackHandler($this->config);
+        return $callbackHandler->run($this->callback, array($twig, $exception));
     }
 
     /**

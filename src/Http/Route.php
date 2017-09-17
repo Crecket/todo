@@ -2,8 +2,12 @@
 
 namespace Greg\ToDo\Http;
 
+use Greg\ToDo\Config;
+
 class Route
 {
+    /** @var Config $config */
+    public $config;
     /** @var string $route */
     public $url;
     /** @var array $methods */
@@ -13,12 +17,14 @@ class Route
 
     /**
      * Route constructor.
+     * @param Config $config
      * @param string $url
      * @param array $methods
      * @param object|string $callback
      */
-    public function __construct(string $url, array $methods, $callback)
+    public function __construct(Config $config, string $url, array $methods, $callback)
     {
+        $this->config = $config;
         $this->url = $url;
         $this->methods = $methods;
         $this->callback = $callback;
@@ -39,6 +45,7 @@ class Route
      */
     public function run(\Twig_Environment $twig)
     {
-        return CallbackHandler::run($this->callback, array($twig));
+        $callbackHandler = new CallbackHandler($this->config);
+        return $callbackHandler->run($this->callback, array($twig));
     }
 }
