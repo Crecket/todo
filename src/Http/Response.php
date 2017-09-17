@@ -2,6 +2,9 @@
 
 namespace Greg\ToDo\Http;
 
+use Greg\ToDo\Exceptions\Http\InvalidHeaderException;
+use Greg\ToDo\Exceptions\Http\InvalidHeaderStringException;
+
 class Response
 {
     /** @var string $body */
@@ -21,7 +24,7 @@ class Response
     {
         $this->body = $body;
         $this->code = $code;
-        $this->headers = $headers;
+        $this->headers = $this->parseHeaders($headers);
     }
 
     /**
@@ -38,6 +41,45 @@ class Response
             $header->output();
         }
         return $this->body;
+    }
+
+    /**
+     * @throws InvalidHeaderException
+     */
+    private function parseHeaders()
+    {
+        $headers = [];
+        foreach ($this->headers as $header) {
+            if ($header instanceof Header) {
+                $headers[] = $header;
+                continue;
+            }
+
+            if (is_string($header)) {
+                $headerParts = explode(":", $header);
+
+                if (count($headerParts) === 0) {
+                    throw new InvalidHeaderException();
+                }
+
+                $headerType = $headerParts[0];
+                unset($headerParts[0]);
+
+                // implode back into a string in case value contained more : characters
+                $headerValue = implode(":", $headerParts);
+
+                $headers[] = new Header($headerType, $headerValue);
+                continue;
+            }
+
+            if (is_array($header)) {
+                $headers[] = new Header($header[0], $header[1]);
+                continue;
+            }
+
+            throw new InvalidHeaderException();
+        }
+        return $headers;
     }
 
     /**
