@@ -44,6 +44,8 @@ class Response
     }
 
     /**
+     * @param $headers
+     * @return Header[]
      * @throws InvalidHeaderException
      */
     private function parseHeaders($headers)
