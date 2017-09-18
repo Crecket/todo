@@ -2,9 +2,9 @@
 
 namespace Greg\ToDo;
 
+use Greg\ToDo\Exceptions\ConfigItemNotFoundException;
 use Greg\ToDo\Exceptions\ParameterNotFoundException;
 use Greg\ToDo\Exceptions\ServiceNotFoundException;
-use Symfony\Component\Yaml\Yaml;
 
 class Config
 {
@@ -22,7 +22,8 @@ class Config
         $this->config = $config;
     }
 
-    public function getParameters(){
+    public function getParameters()
+    {
 
     }
 
@@ -30,7 +31,7 @@ class Config
     {
         if (empty($this->config['parameters'][$parameter])) {
             if ($strict) {
-                throw new ServiceNotFoundException();
+                throw new ParameterNotFoundException();
             }
             return null;
         }
@@ -53,8 +54,19 @@ class Config
             return $this->config[$key];
         }
 
+        $keyParts = explode(".", $key);
+        $configScope = $this->config;
+
+        foreach ($keyParts as $keyPart) {
+            if (!empty($configScope[$keyPart])) {
+                $configScope = $configScope[$keyPart];
+                continue;
+            }
+            throw new ConfigItemNotFoundException();
+        }
+
         if ($strict) {
-            throw new ParameterNotFoundException();
+            throw new ConfigItemNotFoundException();
         }
 
         return null;

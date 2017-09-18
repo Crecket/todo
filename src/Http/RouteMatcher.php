@@ -21,12 +21,32 @@ class RouteMatcher
     }
 
     /**
-     * @param $url
-     * @param $methods
+     * @param string $url
+     * @param array $methods
      * @return bool
      */
-    public function match($url, $methods)
+    public function match(string $url, array $methods)
     {
-        return $url === $this->url && in_array($this->method, $methods);
+        return $this->matchUrl($url) && $this->matchMethod($methods);
+    }
+
+    /**
+     * @param array $methods
+     * @return bool
+     */
+    private function matchMethod(array $methods)
+    {
+        if ($this->method === "ANY") {
+            return true;
+        }
+        return in_array($this->method, $methods);
+    }
+
+    private function matchUrl(string $url)
+    {
+        if ($url === "*") {
+            return true;
+        }
+        return $url === $this->url;
     }
 }

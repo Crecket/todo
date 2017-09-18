@@ -27,7 +27,7 @@ class Router
 
         $loader = new \Twig_Loader_Filesystem(__DIR__.'/../Views');
         $this->twig = new \Twig_Environment($loader, array(
-            "debug" => $this->container->getConfig()->get('debug')
+            "debug" => $this->container->getConfig()->get('application.debug')
         ));
         $this->twig->addExtension(new \Twig_Extension_Debug());
     }
