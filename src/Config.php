@@ -32,7 +32,7 @@ class Config
     {
         if (empty($this->config['parameters'][$parameter])) {
             if ($strict) {
-                throw new ParameterNotFoundException();
+                throw new ParameterNotFoundException("Parameter ".$parameter." is required and was not found");
             }
             return null;
         }
@@ -48,7 +48,7 @@ class Config
     public function getService(string $service)
     {
         if (empty($this->config['services'][$service])) {
-            throw new ServiceNotFoundException();
+            throw new ServiceNotFoundException("Service ".$service." is required and was not found");
         }
 
         return $this->config['services'][$service];
@@ -69,18 +69,25 @@ class Config
         $keyParts = explode(".", $key);
         $configScope = $this->config;
 
+        if (count($keyParts) <= 1) {
+            if ($strict) {
+                throw new ConfigItemNotFoundException("Config item ".$key." is required and was not found");
+            }
+            return null;
+        }
+
         foreach ($keyParts as $keyPart) {
-            if (!empty($configScope[$keyPart])) {
+            if (isset($configScope[$keyPart]) || is_null($configScope[$keyPart])) {
                 $configScope = $configScope[$keyPart];
                 continue;
             }
-            throw new ConfigItemNotFoundException();
+
+            if ($strict) {
+                throw new ConfigItemNotFoundException("Config item ".$key." is required and was not found");
+            }
+            return null;
         }
 
-        if ($strict) {
-            throw new ConfigItemNotFoundException();
-        }
-
-        return null;
+        return $configScope;
     }
 }
