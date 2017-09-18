@@ -22,11 +22,12 @@ class Config
         $this->config = $config;
     }
 
-    public function getParameters()
-    {
-
-    }
-
+    /**
+     * @param string $parameter
+     * @param bool $strict
+     * @return null
+     * @throws ParameterNotFoundException
+     */
     public function getParameter(string $parameter, bool $strict = false)
     {
         if (empty($this->config['parameters'][$parameter])) {
@@ -39,6 +40,11 @@ class Config
         return $this->config['parameters'][$parameter];
     }
 
+    /**
+     * @param string $service
+     * @return mixed
+     * @throws ServiceNotFoundException
+     */
     public function getService(string $service)
     {
         if (empty($this->config['services'][$service])) {
@@ -48,6 +54,12 @@ class Config
         return $this->config['services'][$service];
     }
 
+    /**
+     * @param string $key
+     * @param bool $strict
+     * @return mixed|null
+     * @throws ConfigItemNotFoundException
+     */
     public function get(string $key, bool $strict = false)
     {
         if (!empty($this->config[$key])) {
