@@ -2,6 +2,7 @@
 
 namespace Greg\ToDo;
 
+use Greg\ToDo\Authentication\ProviderRegistration;
 use Greg\ToDo\DependencyInjection\Container;
 use Greg\ToDo\Exceptions\Http\BadRequestException;
 use Greg\ToDo\Exceptions\Http\PageNotFoundException;
@@ -28,6 +29,8 @@ class Application
         $this->container = new Container($this->config);
 
         $this->router = $this->registerRoutes();
+
+        $this->registerAuthenticationProviders();
     }
 
     /**
@@ -70,6 +73,11 @@ class Application
         $router->error(\Exception::class, "ErrorController::error500")->setStrictMode(false);
 
         return $router;
+    }
+
+    private function registerAuthenticationProviders()
+    {
+        $registration = new ProviderRegistration($this->config);
     }
 
 }
