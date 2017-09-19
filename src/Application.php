@@ -3,6 +3,8 @@
 namespace Greg\ToDo;
 
 use Greg\ToDo\Authentication\ProviderRegistration;
+use Greg\ToDo\Console\Commands\ExportModelsCommand;
+use Greg\ToDo\Console\ConsoleHandler;
 use Greg\ToDo\DependencyInjection\Container;
 use Greg\ToDo\Exceptions\Http\BadRequestException;
 use Greg\ToDo\Exceptions\Http\PageNotFoundException;
@@ -12,6 +14,10 @@ use Greg\ToDo\Http\Router;
 
 class Application
 {
+    /** @var bool $consoleMode */
+    private $consoleMode = false;
+    /** @var ConsoleHandler $consoleHandler */
+    private $consoleHandler;
     /** @var Router $router */
     private $router;
     /** @var Config $config */
@@ -21,16 +27,22 @@ class Application
 
     /**
      * Application constructor.
+     * @param bool $consoleMode
      */
-    public function __construct()
+    public function __construct(bool $consoleMode = false)
     {
-        $this->config = $this->loadConfig();
+        $this->consoleMode = $consoleMode;
 
+        $this->config = $this->loadConfig();
         $this->container = new Container($this->config);
 
-        $this->router = $this->registerRoutes();
+        if ($this->consoleMode) {
+            $this->consoleHandler = new ConsoleHandler($this->container);
+            $this->consoleHandler->register(ExportModelsCommand::class);
+        }
 
-        $this->registerAuthenticationProviders();
+        $this->router = $this->registerRoutes();
+//        $this->registerAuthenticationProviders();
     }
 
     /**
@@ -38,6 +50,9 @@ class Application
      */
     public function run()
     {
+        if ($this->consoleMode) {
+            return $this->consoleHandler->run();
+        }
         /** @var Response $response */
         $response = $this->router->run();
         return $response->output();
@@ -47,7 +62,7 @@ class Application
      * @param string $configFile
      * @return array|mixed
      */
-    private function loadConfig(string $configFile = 'config.yaml')
+    private function loadConfig(string $configFile = 'config.yaml'): Config
     {
         $configLoader = new ConfigLoader(__DIR__."/Resources/");
         return $configLoader->load($configFile);
@@ -56,7 +71,7 @@ class Application
     /**
      * @return Router
      */
-    private function registerRoutes()
+    private function registerRoutes(): Router
     {
         $router = new Router($this->container);
 

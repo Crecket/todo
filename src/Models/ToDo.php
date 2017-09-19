@@ -22,4 +22,15 @@ class ToDo implements ModelInterface
     {
         return $this->id;
     }
+
+    public function getTable()
+    {
+        return [
+            "id" => array("type" => "integer", "length" => 11, "null" => false),
+            "title" => array("type" => "varchar", "null" => false),
+            "responsible" => array("type" => "varchar", "null" => false),
+            "when" => array("type" => "datetime", "null" => false),
+            "added" => array("type" => "datetime", "null" => false)
+        ];
+    }
 }
