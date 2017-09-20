@@ -9,7 +9,9 @@ class ErrorController
 
     public static function error500(\Twig_Environment $twig, \Exception $exception)
     {
-        return new Response($twig->render("errors/error500.twig"), 500);
+        return new Response($twig->render("errors/error500.twig", array(
+            "exception" => $exception->getMessage()
+        )), 500);
     }
 
     public static function error404(\Twig_Environment $twig)

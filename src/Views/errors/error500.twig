@@ -2,6 +2,7 @@
 
 {% block body %}
     <div class="container">
-        It looks like something went wrong!
+        <p>It looks like something went wrong!</p>
+        {{ exception|default }}
     </div>
 {% endblock %}
