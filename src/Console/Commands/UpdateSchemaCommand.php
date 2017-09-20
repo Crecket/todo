@@ -2,6 +2,7 @@
 
 namespace Greg\ToDo\Console\Commands;
 
+use Greg\ToDo\Console\ConsoleOutput;
 use Greg\ToDo\DependencyInjection\Container;
 
 class UpdateSchemaCommand implements CommandInterface
@@ -19,12 +20,25 @@ class UpdateSchemaCommand implements CommandInterface
     }
 
     /**
+     * @param ConsoleOutput $consoleOutput
      * @param array $arguments
      * @return string
      */
-    public function run(array $arguments): string
+    public function run(ConsoleOutput $consoleOutput, array $arguments)
     {
-        return "Update schema not yet implemented";
+        $consoleOutput->warning("Update schema not yet implemented");
+
+        $progressMin = 0;
+        $progressMax = 600;
+
+        $progress = $consoleOutput->progress($progressMin, $progressMax, 0);
+
+        for ($i = $progressMin; $i <= $progressMax; $i++) {
+            $progress->setCurrent($i);
+            $progress->render();
+            usleep(10000);
+        }
+
     }
 
     /**

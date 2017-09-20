@@ -2,6 +2,7 @@
 
 namespace Greg\ToDo\Console\Commands;
 
+use Greg\ToDo\Console\ConsoleOutput;
 use Greg\ToDo\DependencyInjection\Container;
 
 interface CommandInterface
@@ -18,8 +19,9 @@ interface CommandInterface
     public function getCommandString(): string;
 
     /**
+     * @param ConsoleOutput $consoleOutput
      * @param array $arguments
      * @return string
      */
-    public function run(array $arguments): string;
+    public function run(ConsoleOutput $consoleOutput, array $arguments);
 }

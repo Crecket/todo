@@ -11,6 +11,8 @@ class ConsoleHandler
 {
     /** @var Container $container */
     private $container;
+    /** @var ConsoleOutput $consoleOutput */
+    private $consoleOutput;
     /** @var array $options */
     private $options;
     /** @var string[] $classes */
@@ -27,6 +29,7 @@ class ConsoleHandler
     public function __construct(Container $container)
     {
         $this->container = $container;
+        $this->consoleOutput = new ConsoleOutput();
         $this->getOptions();
     }
 
@@ -61,23 +64,20 @@ class ConsoleHandler
     /**
      * @return string
      */
-    public function run(): string
+    public function run()
     {
-        $output = "";
-
         foreach ($this->classes as $class) {
             /** @var CommandInterface $classInstance */
             $classInstance = $this->createInstance($class);
 
             // check if command matches the command string
             if ($this->command === $classInstance->getCommandString()) {
-                $output .= $classInstance->run($this->arguments);
+                $classInstance->run($this->consoleOutput, $this->arguments);
                 break;
             }
         }
 
-        $output .= "\nSuccess\n";
-        return $output;
+        $this->consoleOutput->success("\nFinished command successfuly", false);
     }
 
     /**
