@@ -2,6 +2,6 @@
 
 namespace Greg\ToDo\Exceptions\Http;
 
-class InvalidHeaderException extends \Exception
+class InvalidHeaderException extends HttpException
 {
 }

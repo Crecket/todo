@@ -2,6 +2,6 @@
 
 namespace Greg\ToDo\Exceptions\Http;
 
-class PageNotFoundException extends \Exception
+class PageNotFoundException extends HttpException
 {
 }

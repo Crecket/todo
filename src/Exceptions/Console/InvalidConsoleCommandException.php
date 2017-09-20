@@ -2,6 +2,6 @@
 
 namespace Greg\ToDo\Exceptions\Console;
 
-class InvalidConsoleCommandException extends \Exception
+class InvalidConsoleCommandException extends ConsoleException
 {
 }

@@ -2,6 +2,6 @@
 
 namespace Greg\ToDo\Exceptions\Http;
 
-class PermissionDeniedException extends \Exception
+class PermissionDeniedException extends HttpException
 {
 }

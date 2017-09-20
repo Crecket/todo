@@ -2,6 +2,6 @@
 
 namespace Greg\ToDo\Exceptions\Http;
 
-class BadRequestException extends HttpException
+class HttpException extends \Exception
 {
 }
