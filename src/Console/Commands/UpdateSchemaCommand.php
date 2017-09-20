@@ -4,7 +4,7 @@ namespace Greg\ToDo\Console\Commands;
 
 use Greg\ToDo\DependencyInjection\Container;
 
-class ExportModelsCommand implements CommandInterface
+class UpdateSchemaCommand implements CommandInterface
 {
     /** @var Container $container */
     private $container;
@@ -19,13 +19,12 @@ class ExportModelsCommand implements CommandInterface
     }
 
     /**
+     * @param array $arguments
      * @return string
      */
-    public function run(): string
+    public function run(array $arguments): string
     {
-
-
-        return "Export ayyy";
+        return "Update schema not yet implemented";
     }
 
     /**
@@ -33,6 +32,6 @@ class ExportModelsCommand implements CommandInterface
      */
     public function getCommandString(): string
     {
-        return "orm:export";
+        return "orm:schema:update";
     }
 }

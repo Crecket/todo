@@ -17,6 +17,8 @@ class ConsoleHandler
     private $classes;
     /** @var string $command */
     private $command;
+    /** @var array $arguments */
+    private $arguments;
 
     /**
      * ConsoleHandler constructor.
@@ -33,11 +35,14 @@ class ConsoleHandler
      */
     private function getOptions()
     {
-        $this->options = getopt("c:");
-        if ($this->options === false) {
+        $this->options = $GLOBALS['argv'];
+
+        if (!isset($this->options[1])) {
             throw new InvalidConsoleCommandException();
         }
-        $this->command = $this->options['c'];
+
+        $this->command = $this->options[1];
+        $this->arguments = array_splice($this->options, 2);
     }
 
     /**
@@ -64,8 +69,9 @@ class ConsoleHandler
             /** @var CommandInterface $classInstance */
             $classInstance = $this->createInstance($class);
 
+            // check if command matches the command string
             if ($this->command === $classInstance->getCommandString()) {
-                $output .= $classInstance->run();
+                $output .= $classInstance->run($this->arguments);
                 break;
             }
         }

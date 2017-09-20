@@ -18,7 +18,8 @@ interface CommandInterface
     public function getCommandString(): string;
 
     /**
+     * @param array $arguments
      * @return string
      */
-    public function run(): string;
+    public function run(array $arguments): string;
 }

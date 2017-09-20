@@ -3,7 +3,7 @@
 namespace Greg\ToDo;
 
 use Greg\ToDo\Authentication\ProviderRegistration;
-use Greg\ToDo\Console\Commands\ExportModelsCommand;
+use Greg\ToDo\Console\Commands\UpdateSchemaCommand;
 use Greg\ToDo\Console\ConsoleHandler;
 use Greg\ToDo\DependencyInjection\Container;
 use Greg\ToDo\Exceptions\Http\BadRequestException;
@@ -37,8 +37,7 @@ class Application
         $this->container = new Container($this->config);
 
         if ($this->consoleMode) {
-            $this->consoleHandler = new ConsoleHandler($this->container);
-            $this->consoleHandler->register(ExportModelsCommand::class);
+            $this->consoleHandler = $this->registerConsoleCommands();
         }
 
         $this->router = $this->registerRoutes();
@@ -88,6 +87,18 @@ class Application
         $router->error(\Exception::class, "ErrorController::error500")->setStrictMode(false);
 
         return $router;
+    }
+
+    /**
+     * @return ConsoleHandler
+     */
+    private function registerConsoleCommands(): ConsoleHandler
+    {
+        $consoleHandler = new ConsoleHandler($this->container);
+
+        $consoleHandler->register(UpdateSchemaCommand::class);
+
+        return $consoleHandler;
     }
 
     private function registerAuthenticationProviders()
