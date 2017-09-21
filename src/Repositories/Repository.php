@@ -187,7 +187,6 @@ abstract class Repository
     {
         /** @var Model $targetModelInstance */
         $targetModel = new $targetModelName;
-
         if (!$targetModel instanceof Model) {
             throw new InvalidTargetModelGiven();
         }
@@ -203,9 +202,7 @@ abstract class Repository
         // Select from current model and join on $table_to_join
         $sql = 'SELECT * FROM `'.$targetModel::TABLE_NAME.'` as `t`'.'WHERE `t`.`'.$targetColumn.'` = ?';
 
-        $targetModels = $this->executeSql($sql, array(
-            $primaryModel->primary()
-        ), false);
+        $targetModels = $this->executeSql($sql, array($primaryModel->primary()), false);
         return $this->mapDataToModel($targetModels, $targetModelName);
     }
 
@@ -220,7 +217,6 @@ abstract class Repository
     {
         /** @var Model $targetModelInstance */
         $targetModel = new $targetModelName;
-
         if (!$targetModel instanceof Model) {
             throw new InvalidTargetModelGiven();
         }
@@ -229,16 +225,19 @@ abstract class Repository
         if (!isset($primaryRelations['belongs_to'][$targetModelName])) {
             throw new RelationNotFoundException();
         }
+        $targetRelations = $targetModel->getRelations();
+        if (!isset($targetRelations['has_many'][get_class($primaryModel)])) {
+            throw new RelationNotFoundException();
+        }
 
         // get the targetted column from the target model
+        $primaryColumn = $targetRelations['has_many'][get_class($primaryModel)];
         $targetColumn = $primaryRelations['belongs_to'][$targetModelName];
 
         // Select from current model and join on $table_to_join
         $sql = 'SELECT * FROM `'.$targetModel::TABLE_NAME.'` as `t`'.' WHERE `t`.`'.$targetColumn.'` = ?';
 
-        $targetModels = $this->executeSql($sql, array(
-            $primaryModel->todo_id
-        ), false);
+        $targetModels = $this->executeSql($sql, array($primaryModel->$primaryColumn), false);
         return $this->mapDataToModel($targetModels, $targetModelName);
     }
 
