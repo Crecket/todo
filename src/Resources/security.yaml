@@ -1,0 +1,33 @@
+security:
+    firewalls:
+        main_firewall:
+            match: '*'
+            required_level: 0
+
+        auth_firewall:
+            match: '/auth_only'
+            required_level: 1
+
+        admin_firewall:
+            # match multipe urls
+            match:
+                - '/admin'
+                - '/admin_multiple'
+            required_level: 2
+
+    authentication:
+        user_model: 'Greg\ToDo\Models\User'
+        providers:
+            post_request:
+                class: 'Greg\ToDo\Authentication\Providers\PostRequestAuthenticationProvider'
+                match:
+                    method: 'POST'
+                    url: '/login'
+            session:
+                class: 'Greg\ToDo\Authentication\Providers\SessionAuthenticationProvider'
+                match:
+                    method: 'ANY'
+                    url: '*'
+                options:
+                    # force check causes the provider to re-check the database on every request
+                    force_check: true

@@ -1,21 +1,8 @@
 imports:
     - parameters.yaml
     - services.yaml
+    - security.yaml
 
 application:
     debug: true
     cache_dir: 'cache'
-
-    authentication:
-        user_model: 'Greg\ToDo\Models\User'
-        providers:
-            post_request:
-                class: 'Greg\ToDo\Authentication\Providers\PostRequestAuthenticationProvider'
-                match:
-                    method: 'ANY'
-                    url: '/login'
-            session:
-                class: 'Greg\ToDo\Authentication\Providers\SessionAuthenticationProvider'
-                match:
-                    method: 'ANY'
-                    url: '*'

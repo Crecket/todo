@@ -2,7 +2,7 @@
 
 namespace Greg\ToDo;
 
-use Greg\ToDo\Authentication\ProviderRegistration;
+use Greg\ToDo\Authentication\ProviderHandler;
 use Greg\ToDo\Console\Commands\UpdateSchemaCommand;
 use Greg\ToDo\Console\ConsoleHandler;
 use Greg\ToDo\DependencyInjection\Container;
@@ -24,6 +24,8 @@ class Application
     private $config;
     /** @var Container $container */
     private $container;
+    /** @var ProviderHandler $providerRegistration */
+    private $providerRegistration;
 
     /**
      * Application constructor.
@@ -41,7 +43,7 @@ class Application
         }
 
         $this->router = $this->registerRoutes();
-//        $this->registerAuthenticationProviders();
+        $this->providerRegistration = $this->registerAuthenticationProviders();
     }
 
     /**
@@ -101,9 +103,60 @@ class Application
         return $consoleHandler;
     }
 
-    private function registerAuthenticationProviders()
+    /**
+     * @return ProviderHandler
+     */
+    private function registerAuthenticationProviders(): ProviderHandler
     {
-        $registration = new ProviderRegistration($this->config);
+        $registration = new ProviderHandler($this->config);
+        return $registration;
     }
 
+    /**
+     * @return bool
+     */
+    public function isConsoleMode(): bool
+    {
+        return $this->consoleMode;
+    }
+
+    /**
+     * @return ConsoleHandler
+     */
+    public function getConsoleHandler(): ConsoleHandler
+    {
+        return $this->consoleHandler;
+    }
+
+    /**
+     * @return Router
+     */
+    public function getRouter(): Router
+    {
+        return $this->router;
+    }
+
+    /**
+     * @return Config
+     */
+    public function getConfig(): Config
+    {
+        return $this->config;
+    }
+
+    /**
+     * @return Container
+     */
+    public function getContainer(): Container
+    {
+        return $this->container;
+    }
+
+    /**
+     * @return ProviderHandler
+     */
+    public function getProviderRegistration(): ProviderHandler
+    {
+        return $this->providerRegistration;
+    }
 }

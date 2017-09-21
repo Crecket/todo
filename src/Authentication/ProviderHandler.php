@@ -6,7 +6,7 @@ use Greg\ToDo\Config;
 use Greg\ToDo\Exceptions\ClassNotFoundException;
 use Greg\ToDo\Exceptions\ConfigItemNotFoundException;
 
-class ProviderRegistration
+class ProviderHandler
 {
     /** @var Config $config */
     private $config;
@@ -25,17 +25,12 @@ class ProviderRegistration
 
     private function initialConfiguration()
     {
-        $this->userModel = $this->config->get("application.authentication.user_model", true);
+        $this->userModel = $this->config->get("security.authentication.user_model", true);
         if (!class_exists($this->userModel)) {
-            throw new ClassNotFoundException("The user_model Class set in the configuration was not found");
+            throw new ClassNotFoundException("The configured user_model class does not exist");
         }
 
-        $this->setupProviders();
-    }
-
-    private function setupProviders()
-    {
-        $providers = $this->config->get("application.authentication.providers");
+        $providers = $this->config->get("security.authentication.providers");
         foreach ($providers as $provider) {
             $this->setupProvider($provider);
         }
@@ -51,5 +46,8 @@ class ProviderRegistration
         if (!class_exists($className)) {
             throw new ClassNotFoundException();
         }
+
+        var_dump($className);
+        exit;
     }
 }
