@@ -2,12 +2,12 @@
 
 namespace Greg\ToDo\Repositories;
 
-use Greg\ToDo\Models\Todo;
+use Greg\ToDo\Models\ToDo;
 
 class ToDoRepository extends Repository
 {
     const TABLE_NAME = "todo";
 
     /** @var string $modelName */
-    protected $modelName = Todo::class;
+    protected $modelName = ToDo::class;
 }

@@ -2,8 +2,10 @@
 
 namespace Greg\ToDo\Models;
 
-class ToDo implements ModelInterface
+class ToDo extends Model
 {
+    const TABLE_NAME = "todo";
+
     /** @var integer $id */
     public $id;
     /** @var string $title */
@@ -23,14 +25,15 @@ class ToDo implements ModelInterface
         return $this->id;
     }
 
-    public function getTable()
+    /**
+     * @return array
+     */
+    public function getRelations(): array
     {
         return [
-            "id" => array("type" => "integer", "length" => 11, "null" => false),
-            "title" => array("type" => "varchar", "null" => false),
-            "responsible" => array("type" => "varchar", "null" => false),
-            "when" => array("type" => "datetime", "null" => false),
-            "added" => array("type" => "datetime", "null" => false)
+            'has_many' => [
+                ToDoComment::class => 'todo_id'
+            ]
         ];
     }
 }

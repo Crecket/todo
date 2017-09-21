@@ -13,3 +13,11 @@ services:
         class: 'Greg\ToDo\Repositories\ToDoRepository'
         parameters:
             - {type: 'service', service: 'application.database'}
+    repositories.todo_comment_repository:
+        class: 'Greg\ToDo\Repositories\ToDoCommentRepository'
+        parameters:
+            - {type: 'service', service: 'application.database'}
+    repositories.user_repository:
+        class: 'Greg\ToDo\Repositories\UserRepository'
+        parameters:
+            - {type: 'service', service: 'application.database'}

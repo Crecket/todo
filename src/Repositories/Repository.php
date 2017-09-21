@@ -3,7 +3,9 @@
 namespace Greg\ToDo\Repositories;
 
 use Greg\ToDo\Database;
-use Greg\ToDo\Models\ModelInterface;
+use Greg\ToDo\Exceptions\ORM\InvalidTargetModelGiven;
+use Greg\ToDo\Exceptions\ORM\RelationNotFoundException;
+use Greg\ToDo\Models\Model;
 
 abstract class Repository
 {
@@ -31,7 +33,7 @@ abstract class Repository
      */
     public function find($value)
     {
-        if ($value instanceof ModelInterface) {
+        if ($value instanceof Model) {
             $value = $value->primary();
         }
 
@@ -56,7 +58,7 @@ abstract class Repository
      */
     public function findBy(string $key, $value, $single = false)
     {
-        if ($value instanceof ModelInterface) {
+        if ($value instanceof Model) {
             $value = $value->primary();
         }
 
@@ -87,10 +89,10 @@ abstract class Repository
     }
 
     /**
-     * @param ModelInterface $model
+     * @param Model $model
      * @return int
      */
-    public function delete(ModelInterface $model)
+    public function delete(Model $model)
     {
         $sql = 'DELETE FROM '.static::TABLE_NAME.' WHERE '.static::PRIMARY_KEY.' = :value';
 
@@ -102,10 +104,10 @@ abstract class Repository
     }
 
     /**
-     * @param ModelInterface $model
+     * @param Model $model
      * @return int
      */
-    public function insert(ModelInterface $model)
+    public function insert(Model $model)
     {
         $sql = 'INSERT INTO '.static::TABLE_NAME.' ( ';
         $sql_questionmarks = '';
@@ -139,10 +141,10 @@ abstract class Repository
     }
 
     /**
-     * @param ModelInterface $model
+     * @param Model $model
      * @return int
      */
-    public function update(ModelInterface $model)
+    public function update(Model $model)
     {
         $sql = 'UPDATE '.static::TABLE_NAME.' SET ';
         $column_values = array();
@@ -175,25 +177,113 @@ abstract class Repository
     }
 
     /**
-     * @param array $data
-     * @return ModelInterface[]
+     * @param Model $primaryModel
+     * @param string $targetModelName
+     * @return Model[]
+     * @throws InvalidTargetModelGiven
+     * @throws RelationNotFoundException
      */
-    private function mapDataToModel($data)
+    public function hasMany(Model $primaryModel, string $targetModelName)
     {
+        /** @var Model $targetModelInstance */
+        $targetModel = new $targetModelName;
+
+        if (!$targetModel instanceof Model) {
+            throw new InvalidTargetModelGiven();
+        }
+
+        $primaryRelations = $primaryModel->getRelations();
+        if (!isset($primaryRelations['has_many'][$targetModelName])) {
+            throw new RelationNotFoundException();
+        }
+
+        // get the targetted column from the target model
+        $targetColumn = $primaryRelations['has_many'][$targetModelName];
+
+        // Select from current model and join on $table_to_join
+        $sql = 'SELECT * FROM `'.$targetModel::TABLE_NAME.'` as `t`'.'WHERE `t`.`'.$targetColumn.'` = ?';
+
+        $targetModels = $this->executeSql($sql, array(
+            $primaryModel->primary()
+        ), false);
+        return $this->mapDataToModel($targetModels, $targetModelName);
+    }
+
+    /**
+     * @param Model $primaryModel
+     * @param string $targetModelName
+     * @return Model[]
+     * @throws InvalidTargetModelGiven
+     * @throws RelationNotFoundException
+     */
+    public function belongsTo(Model $primaryModel, string $targetModelName)
+    {
+        /** @var Model $targetModelInstance */
+        $targetModel = new $targetModelName;
+
+        if (!$targetModel instanceof Model) {
+            throw new InvalidTargetModelGiven();
+        }
+
+        $primaryRelations = $primaryModel->getRelations();
+        if (!isset($primaryRelations['belongs_to'][$targetModelName])) {
+            throw new RelationNotFoundException();
+        }
+
+        // get the targetted column from the target model
+        $targetColumn = $primaryRelations['belongs_to'][$targetModelName];
+
+        // Select from current model and join on $table_to_join
+        $sql = 'SELECT * FROM `'.$targetModel::TABLE_NAME.'` as `t`'.' WHERE `t`.`'.$targetColumn.'` = ?';
+
+        $targetModels = $this->executeSql($sql, array(
+            $primaryModel->todo_id
+        ), false);
+        return $this->mapDataToModel($targetModels, $targetModelName);
+    }
+
+    /**
+     * @param string $sql
+     * @param array $values
+     * @param bool $single
+     * @return array|mixed
+     */
+    private function executeSql(string $sql, array $values, bool $single = true)
+    {
+        $prepare = $this->database->connection->prepare($sql);
+        $prepare->execute($values);
+        if ($single) {
+            return $prepare->fetch(\PDO::FETCH_ASSOC);
+        }
+        return $prepare->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * @param array $data
+     * @param string|bool $modelName
+     * @return Model[]
+     */
+    private function mapDataToModel(array $data, $modelName = false)
+    {
+        if ($modelName === false) {
+            $modelName = $this->modelName;
+        }
+
         $models = [];
         foreach ($data as $row) {
-            $models[] = $this->mapRowToModel($row);
+            $models[] = $this->mapRowToModel($row, $modelName);
         }
         return $models;
     }
 
     /**
      * @param array $row
-     * @return ModelInterface
+     * @param string $modelName
+     * @return Model
      */
-    private function mapRowToModel($row)
+    private function mapRowToModel($row, string $modelName): Model
     {
-        $model = new $this->modelName;
+        $model = new $modelName;
         foreach ($row as $columnName => $value) {
             $model->$columnName = $value;
         }
