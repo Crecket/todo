@@ -16,6 +16,7 @@
 
                     <div class="secondary-content">
                         <form method="post" action="/delete">
+                            <input type="hidden" name="_method" value="DELETE"/>
                             <input type="hidden" name="id" value="{{ todo.id }}">
                             <a class="waves-effect waves-light btn green modal-trigger" href="#modal{{ todo.id }}">
                                 <i class="material-icons">mode_edit</i>
@@ -30,6 +31,7 @@
 
                     <div id="modal{{ todo.id }}" class="modal">
                         <form method="post" action="/update">
+                            <input type="hidden" name="_method" value="PUT"/>
                             <input type="hidden" name="id" value="{{ todo.id }}">
 
                             <div class="modal-content">

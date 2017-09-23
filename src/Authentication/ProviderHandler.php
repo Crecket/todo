@@ -5,6 +5,9 @@ namespace Greg\ToDo\Authentication;
 use Greg\ToDo\Config;
 use Greg\ToDo\Exceptions\ClassNotFoundException;
 use Greg\ToDo\Exceptions\ConfigItemNotFoundException;
+use Greg\ToDo\Exceptions\InvalidConfigurationException;
+use Greg\ToDo\Http\RouteMatcher;
+use Greg\ToDo\Http\Router;
 
 class ProviderHandler
 {
@@ -12,6 +15,8 @@ class ProviderHandler
     private $config;
     /** @var string $userModel */
     private $userModel;
+    /** @var array $providers */
+    private $providers;
 
     /**
      * ProviderRegistration constructor.
@@ -23,6 +28,35 @@ class ProviderHandler
         $this->initialConfiguration();
     }
 
+    /**
+     * @param Router $router
+     * @throws InvalidConfigurationException
+     */
+    public function checkProviders(Router $router)
+    {
+        foreach ($this->providers as $providerName => $provider) {
+            if (empty($provider['match'])) {
+                throw new InvalidConfigurationException("Missing required match property for authentication provider configuration");
+            }
+            if (empty($provider['match']['url'])) {
+                throw new InvalidConfigurationException("Missing required match.url property for authentication provider configuration");
+            }
+
+            // default method to GET
+            $matchMethod = $provider['match']['method'] ?? array("GET");
+            $matchUrl = (array)$provider['match']['url'];
+
+            $routeMatcher = new RouteMatcher($router->getUrl(), $router->getMethod());
+            if($routeMatcher->match($matchUrl, $matchMethod)){
+
+            }
+
+        }
+    }
+
+    /**
+     * @throws ClassNotFoundException
+     */
     private function initialConfiguration()
     {
         $this->userModel = $this->config->get("security.authentication.user_model", true);
@@ -31,12 +65,18 @@ class ProviderHandler
         }
 
         $providers = $this->config->get("security.authentication.providers");
-        foreach ($providers as $provider) {
-            $this->setupProvider($provider);
+        foreach ($providers as $providerName => $provider) {
+            $this->setupProvider($providerName, $provider);
         }
     }
 
-    private function setupProvider($provider)
+    /**
+     * @param string $providerName
+     * @param array $provider
+     * @throws ClassNotFoundException
+     * @throws ConfigItemNotFoundException
+     */
+    private function setupProvider(string $providerName, array $provider)
     {
         if (empty($provider['class'])) {
             throw new ConfigItemNotFoundException();
@@ -47,7 +87,6 @@ class ProviderHandler
             throw new ClassNotFoundException();
         }
 
-        var_dump($className);
-        exit;
+        $this->providers[$providerName] = $provider;
     }
 }

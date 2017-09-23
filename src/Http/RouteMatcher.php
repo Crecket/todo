@@ -21,13 +21,19 @@ class RouteMatcher
     }
 
     /**
-     * @param string $url
-     * @param array $methods
+     * @param string|array $url
+     * @param string|array $method
      * @return bool
      */
-    public function match(string $url, array $methods)
+    public function match($url, $method)
     {
-        return $this->matchUrl($url) && $this->matchMethod($methods);
+        if (!is_array($url)) {
+            $url = array($url);
+        }
+        if (!is_array($method)) {
+            $method = array($method);
+        }
+        return $this->matchUrl($url) && $this->matchMethod($method);
     }
 
     /**
@@ -36,17 +42,31 @@ class RouteMatcher
      */
     private function matchMethod(array $methods)
     {
-        if ($this->method === "ANY") {
-            return true;
+        foreach ($methods as $method) {
+            if ($method === "ANY") {
+                return true;
+            }
+            if ($method === $this->method) {
+                return true;
+            }
         }
-        return in_array($this->method, $methods);
+        return false;
     }
 
-    private function matchUrl(string $url)
+    /**
+     * @param array $urls
+     * @return bool
+     */
+    private function matchUrl(array $urls)
     {
-        if ($url === "*") {
-            return true;
+        foreach ($urls as $url) {
+            if ($url === "*") {
+                return true;
+            }
+            if ($url === $this->url) {
+                return true;
+            }
         }
-        return $url === $this->url;
+        return false;
     }
 }

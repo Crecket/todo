@@ -24,8 +24,8 @@ class Application
     private $config;
     /** @var Container $container */
     private $container;
-    /** @var ProviderHandler $providerRegistration */
-    private $providerRegistration;
+    /** @var ProviderHandler $providerHandler */
+    private $providerHandler;
 
     /**
      * Application constructor.
@@ -43,7 +43,7 @@ class Application
         }
 
         $this->router = $this->registerRoutes();
-        $this->providerRegistration = $this->registerAuthenticationProviders();
+        $this->providerHandler = $this->registerAuthenticationProviders();
     }
 
     /**
@@ -54,6 +54,13 @@ class Application
         if ($this->consoleMode) {
             return $this->consoleHandler->run();
         }
+
+        // only start session when we're running in http mode
+        session_start();
+
+        // run the registered authentication providers
+        $this->providerHandler->checkProviders($this->router);
+
         /** @var Response $response */
         $response = $this->router->run();
         return $response->output();
@@ -78,8 +85,8 @@ class Application
 
         $router->get("/", "ToDoController::home");
         $router->post("/add", "ToDoController::add");
-        $router->post("/delete", "ToDoController::delete");
-        $router->post("/update", "ToDoController::update");
+        $router->delete("/delete", "ToDoController::delete");
+        $router->put("/update", "ToDoController::update");
 
         $router->get("/test", "TestController::test");
 
@@ -155,8 +162,8 @@ class Application
     /**
      * @return ProviderHandler
      */
-    public function getProviderRegistration(): ProviderHandler
+    public function getProviderHandler(): ProviderHandler
     {
-        return $this->providerRegistration;
+        return $this->providerHandler;
     }
 }

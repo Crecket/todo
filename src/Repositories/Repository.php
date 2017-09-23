@@ -47,6 +47,7 @@ abstract class Repository
         if ($row === false) {
             return false;
         }
+
         return $this->mapRowToModel($row);
     }
 
@@ -280,8 +281,12 @@ abstract class Repository
      * @param string $modelName
      * @return Model
      */
-    private function mapRowToModel($row, string $modelName): Model
+    private function mapRowToModel($row, string $modelName = null): Model
     {
+        if ($modelName === null) {
+            $modelName = $this->modelName;
+        }
+
         $model = new $modelName;
         foreach ($row as $columnName => $value) {
             $model->$columnName = $value;

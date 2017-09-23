@@ -8,6 +8,10 @@ use Greg\ToDo\Exceptions\Http\PageNotFoundException;
 
 class Router
 {
+    /** @var string */
+    private $url = "";
+    /** @var string */
+    private $method = "";
     /** @var Route[] $routes */
     private $routes;
     /** @var ErrorHandler[] $errorHandlers */
@@ -20,8 +24,10 @@ class Router
     /**
      * Router constructor.
      * @param Container $container
+     * @param bool $url
+     * @param bool $method
      */
-    public function __construct(Container $container)
+    public function __construct(Container $container, $url = false, $method = false)
     {
         $this->container = $container;
 
@@ -30,6 +36,23 @@ class Router
             "debug" => $this->container->getConfig()->get('application.debug')
         ));
         $this->twig->addExtension(new \Twig_Extension_Debug());
+
+        $this->url = $url === false ? $_SERVER['REQUEST_URI'] : $url;
+        $this->method = $method === false ? $_SERVER['REQUEST_METHOD'] : $method;
+
+        if (!empty($_POST['_method'])) {
+            switch (strtoupper($_POST['_method'])) {
+                case 'PUT':
+                    $this->method = "PUT";
+                    break;
+                case 'DELETE':
+                    $this->method = "DELETE";
+                    break;
+                default:
+                    $this->method = "POST";
+                    break;
+            }
+        }
     }
 
     /**
@@ -64,6 +87,26 @@ class Router
     }
 
     /**
+     * @param string $route
+     * @param callable|string $callback
+     * @return Route|string
+     */
+    public function put(string $route, $callback)
+    {
+        return $this->register($route, array("PUT"), $callback);
+    }
+
+    /**
+     * @param string $route
+     * @param callable|string $callback
+     * @return Route|string
+     */
+    public function delete(string $route, $callback)
+    {
+        return $this->register($route, array("DELETE"), $callback);
+    }
+
+    /**
      * @param string $exception
      * @param callable|string $callback
      * @return ErrorHandler
@@ -89,20 +132,15 @@ class Router
     }
 
     /**
-     * @param bool $url
-     * @param bool $method
      * @return mixed
      * @throws \Exception
      */
-    public function run($url = false, $method = false)
+    public function run()
     {
-        $url = $url === false ? $_SERVER['REQUEST_URI'] : $url;
-        $method = $method === false ? $_SERVER['REQUEST_METHOD'] : $method;
-
         try {
             /** @var Route $route */
             foreach ($this->routes as $route) {
-                $routeMatcher = new RouteMatcher($url, $method);
+                $routeMatcher = new RouteMatcher($this->url, $this->method);
                 if ($route->isMatch($routeMatcher)) {
                     $response = $route->run($this->twig);
 
@@ -147,4 +185,29 @@ class Router
         }
         return $response;
     }
+
+    /**
+     * @return string
+     */
+    public function getUrl(): string
+    {
+        return $this->url;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMethod(): string
+    {
+        return $this->method;
+    }
+
+    /**
+     * @return Route[]
+     */
+    public function getRoutes(): array
+    {
+        return $this->routes;
+    }
+
 }
