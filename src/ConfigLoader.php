@@ -9,7 +9,7 @@ class ConfigLoader
     /** @var string $root */
     private $root;
     /** @var array $loadedFiles */
-    private $loadedFiles;
+    private $loadedFiles = [];
 
     /**
      * ConfigLoader constructor.
@@ -39,7 +39,7 @@ class ConfigLoader
         $fileLocation = $this->root.$file;
 
         // check if file has already been parsed
-        if (!empty(in_array($fileLocation))) {
+        if (!empty(in_array($fileLocation, $this->loadedFiles))) {
             return array();
         }
 
