@@ -10,8 +10,10 @@ class ToDo extends Model
     public $id;
     /** @var string $title */
     public $title;
-    /** @var string $responsible */
-    public $responsible;
+    /** @var int $user_id */
+    public $user_id;
+    /** @var int $completed */
+    public $completed;
     /** @var \DateTime $when */
     public $when;
     /** @var \DateTime $added */
@@ -33,7 +35,25 @@ class ToDo extends Model
         return [
             'has_many' => [
                 ToDoComment::class => 'todo_id'
+            ],
+            'has_one' => [
+                User::class => 'user_id'
             ]
+        ];
+    }
+
+    /**
+     *
+     */
+    public function getColumns(): array
+    {
+        return [
+            'id',
+            'title',
+            'user_id',
+            'completed',
+            'when',
+            'added'
         ];
     }
 }

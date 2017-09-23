@@ -87,6 +87,7 @@ class Application
         $router->post("/add", "ToDoController::add");
         $router->delete("/delete", "ToDoController::delete");
         $router->put("/update", "ToDoController::update");
+        $router->put("/complete", "ToDoController::complete");
 
         $router->get("/test", "TestController::test");
         $router->get("/test2", "TestController::testSecond");

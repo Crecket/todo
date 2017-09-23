@@ -1,6 +1,14 @@
 {% extends 'bootstrap.twig' %}
 
 {% block body %}
+    <style type="text/css">
+        form, table {
+            display: inline;
+            margin: 0px;
+            padding: 0px;
+        }
+    </style>
+
     <div class="container">
         <ul class="collection with-header">
             <li class="collection-header">
@@ -9,18 +17,42 @@
 
             {% for todo in todos %}
                 <li class="collection-item avatar">
-                    <i class="material-icons circle">list</i>
+                    {% if todo.completed == 1 %}
+                        <i class="material-icons circle green">check</i>
+                    {% else %}
+                        <i class="material-icons circle">list</i>
+                    {% endif %}
                     <span class="title">{{ todo.title }}</span>
-                    <p>{{ todo.responsible }}</p>
+                    <p>{{ todo.username }}</p>
                     <i>{{ todo.when }}</i>
 
                     <div class="secondary-content">
+                        <a class="waves-effect waves-light btn blue modal-trigger" href="#modal{{ todo.id }}">
+                            <i class="material-icons">mode_edit</i>
+                        </a>
+
+                        <form method="post" action="/complete">
+                            <input type="hidden" name="_method" value="PUT"/>
+                            <input type="hidden" name="id" value="{{ todo.id }}">
+
+                            {% if todo.completed == 0 %}
+                                <input type="hidden" name="completed" value="1"/>
+                                <button class="waves-effect waves-light btn green tooltipped"
+                                        data-position="top" data-delay="50" data-tooltip="Mark this item as completed">
+                                    <i class="material-icons">check_box</i>
+                                </button>
+                            {% else %}
+                                <input type="hidden" name="completed" value="0"/>
+                                <button class="waves-effect waves-light btn green tooltipped"
+                                        data-position="top" data-delay="50" data-tooltip="Set item back to not-completed">
+                                    <i class="material-icons">check_box_outline_blank</i>
+                                </button>
+                            {% endif %}
+                        </form>
+
                         <form method="post" action="/delete">
                             <input type="hidden" name="_method" value="DELETE"/>
                             <input type="hidden" name="id" value="{{ todo.id }}">
-                            <a class="waves-effect waves-light btn green modal-trigger" href="#modal{{ todo.id }}">
-                                <i class="material-icons">mode_edit</i>
-                            </a>
 
                             <button class="waves-effect waves-light btn red tooltipped"
                                     data-position="top" data-delay="50" data-tooltip="Remove this item">
@@ -47,9 +79,16 @@
 
                                 <div class="row">
                                     <div class="input-field col s12">
-                                        <input id="responsible" type="text" name="responsible"
-                                               class="validate" value="{{ todo.responsible }}">
-                                        <label for="responsible">Responsible</label>
+                                        <select id="user_id" name="user_id" class="validate">
+                                            <option value="" disabled selected>Choose your option</option>
+                                            {% for user in users %}
+                                                <option value="{{ user.id }}"
+                                                        {% if user.id == todo.user_id %}selected{% endif %}>
+                                                    {{ user.username }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <label>Assigned user</label>
                                     </div>
                                 </div>
 
@@ -89,8 +128,16 @@
 
                     <div class="row">
                         <div class="input-field col s12">
-                            <input id="responsible" name="responsible" type="text" class="validate" required>
-                            <label for="responsible">Responsible</label>
+                            <select id="user_id" name="user_id" class="validate">
+                                <option value="" disabled selected>Assign a user</option>
+                                {% for user in users %}
+                                    <option value="{{ user.id }}"
+                                            {% if user.id == todo.user_id %}selected{% endif %}>
+                                        {{ user.username }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <label>Assigned user</label>
                         </div>
                     </div>
 
@@ -122,5 +169,6 @@
         $('.timepicker').pickatime({
             twelvehour: false
         });
+        $('select').material_select();
     </script>
 {% endblock %}

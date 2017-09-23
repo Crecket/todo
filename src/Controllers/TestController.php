@@ -33,16 +33,18 @@ class TestController extends Controller
 
         $todocomments = $repository->all();
         if (count($todocomments) === 0) {
-            throw new \Exception("No todos found to test with");
+            throw new \Exception("No todocomments found to test with");
         }
         $todocomment = $todocomments[0];
 
         $todosFinal = $repository->belongsTo($todocomment, ToDo::class);
 
-        var_dump(array(
-            $todoCommentsFinal,
-            $todosFinal
-        ));
+        var_dump(
+            array(
+                $todoCommentsFinal,
+                $todosFinal
+            )
+        );
         return null;
     }
 

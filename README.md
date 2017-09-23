@@ -1,1 +1,6 @@
-ToDo app for a school project
+# ToDo
+
+## ORM
+### Model
+- Primary key has to be 'id'
+- Properties should match the table's column names

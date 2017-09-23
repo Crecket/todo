@@ -4,7 +4,9 @@ namespace Greg\ToDo\Controllers;
 
 use Greg\ToDo\Http\Redirect;
 use Greg\ToDo\Models\ToDo;
+use Greg\ToDo\Models\User;
 use Greg\ToDo\Repositories\ToDoRepository;
+use Greg\ToDo\Repositories\UserRepository;
 
 class ToDoController extends Controller
 {
@@ -14,14 +16,20 @@ class ToDoController extends Controller
      */
     public function home(\Twig_Environment $twig)
     {
-        /** @var ToDoRepository $repository */
-        $repository = $this->container->get("repositories.todo_repository");
+        /** @var ToDoRepository $todoRepository */
+        $todoRepository = $this->container->get("repositories.todo_repository");
+        /** @var UserRepository $userRepository */
+        $userRepository = $this->container->get("repositories.user_repository");
 
         /** @var ToDo[] $result */
-        $todos = $repository->all();
+        $todos = $todoRepository->all();
+
+        /** @var User[] $result */
+        $users = $userRepository->all();
 
         return $twig->render("home.twig", array(
-            "todos" => $todos
+            "todos" => $todos,
+            "users" => $users
         ));
     }
 
@@ -33,7 +41,7 @@ class ToDoController extends Controller
     {
         $todo = new ToDo();
         $todo->title = $_POST['title'];
-        $todo->responsible = $_POST['responsible'];
+        $todo->user_id = $_POST['user_id'];
         $todo->when = $_POST['when'];
 
         /** @var ToDoRepository $repository */
@@ -71,17 +79,37 @@ class ToDoController extends Controller
         $repository = $this->container->get("repositories.todo_repository");
 
         $todo = $repository->find($_POST['id']);
-        if(!$todo instanceof ToDo){
+        if (!$todo instanceof ToDo) {
             // TODO error messages
             return new Redirect("/");
         }
 
         $todo->title = $_POST['title'];
-        $todo->responsible = $_POST['responsible'];
+        $todo->user_id = $_POST['user_id'];
         $todo->when = $_POST['when'];
 
         $repository->update($todo);
 
+        return new Redirect("/");
+    }
+
+    /**
+     * @param \Twig_Environment $twig
+     * @return Redirect
+     */
+    public function complete(\Twig_Environment $twig)
+    {
+        /** @var ToDoRepository $repository */
+        $repository = $this->container->get("repositories.todo_repository");
+
+        $todo = $repository->find($_POST['id']);
+        if (!$todo instanceof ToDo) {
+            // TODO error messages
+            return new Redirect("/");
+        }
+        $todo->completed = (int)$_POST['completed'];
+
+        $repository->update($todo);
         return new Redirect("/");
     }
 }

@@ -36,4 +36,18 @@ class ToDoComment extends Model
             ]
         ];
     }
+
+    /**
+     *
+     */
+    public function getColumns(): array
+    {
+        return [
+            'id',
+            'text',
+            'name',
+            'when',
+            'todo_id'
+        ];
+    }
 }

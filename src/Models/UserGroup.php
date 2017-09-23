@@ -20,4 +20,16 @@ class UserGroup extends Model
     {
         return $this->id;
     }
+
+    /**
+     *
+     */
+    public function getColumns(): array
+    {
+        return [
+            'id',
+            'name',
+            'authentication_level'
+        ];
+    }
 }

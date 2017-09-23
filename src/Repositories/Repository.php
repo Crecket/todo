@@ -100,31 +100,6 @@ abstract class Repository
     }
 
     /**
-     * @return string
-     */
-    public function getRelationSql()
-    {
-        /** @var Model $model */
-        $model = new $this->modelName;
-
-        $relations = $model->getRelations();
-        if (empty($relations["has_one"])) {
-            return " ";
-        }
-
-        $relationSql = "";
-        foreach ($relations["has_one"] as $targetRelation => $relationColumn) {
-            /** @var Model $model */
-            $targetModel = new $targetRelation;
-
-            $relationSql .= " INNER JOIN `".$targetModel::TABLE_NAME."` ON ".
-                "`primary_table`.`".$relationColumn."` = `".$targetModel::TABLE_NAME."`.`id`";
-        }
-
-        return $relationSql;
-    }
-
-    /**
      * @param Model $model
      * @return int
      */
@@ -187,10 +162,12 @@ abstract class Repository
 
         // get all properties from the model
         $properties = get_object_vars($model);
+        $validColumns = $model->getColumns();
 
         $first = true;
         foreach ($properties as $columnName => $columnValue) {
-            if ($columnName === "id") {
+            // check if this column is valid or added dynamically through relations
+            if ($columnName === "id" || !in_array($columnName, $validColumns)) {
                 continue;
             }
 
@@ -235,9 +212,12 @@ abstract class Repository
         // get the targetted column from the target model
         $targetColumn = $primaryRelations["has_many"][$targetModelName];
 
-        // Select from current model and join on $table_to_join
-        $sql = "SELECT * FROM `".$targetModel::TABLE_NAME."` as `t`"."WHERE `t`.`".$targetColumn."` = ?";
+        // Select from current model and fetch any relations
+        $sqlStart = "SELECT * FROM `".$targetModel::TABLE_NAME."` as `primary_table`";
+        $sqlRelations = $this->getRelationSql($targetModelName);
+        $sqlWhere = " WHERE `primary_table`.`".$targetColumn."` = ?";
 
+        $sql = $sqlStart.$sqlRelations.$sqlWhere;
         $targetModels = $this->executeSql($sql, array($primaryModel->primary()), false);
         return $this->mapDataToModel($targetModels, $targetModelName);
     }
@@ -270,9 +250,12 @@ abstract class Repository
         $primaryColumn = $targetRelations["has_many"][get_class($primaryModel)];
         $targetColumn = $primaryRelations["belongs_to"][$targetModelName];
 
-        // Select from current model and join on $table_to_join
-        $sql = "SELECT * FROM `".$targetModel::TABLE_NAME."` as `t`"." WHERE `t`.`".$targetColumn."` = ?";
+        // Select from current model and fetch any relations
+        $sqlStart = "SELECT * FROM `".$targetModel::TABLE_NAME."` as `primary_table`";
+        $sqlRelations = $this->getRelationSql($targetModelName);
+        $sqlWhere = " WHERE `primary_table`.`".$targetColumn."` = ?";
 
+        $sql = $sqlStart.$sqlRelations.$sqlWhere;
         $targetModels = $this->executeSql($sql, array($primaryModel->$primaryColumn), false);
         return $this->mapDataToModel($targetModels, $targetModelName);
     }
@@ -301,10 +284,55 @@ abstract class Repository
         $primaryColumn = $primaryRelations["has_one"][$targetModelName];
 
         // Select from current model and join on $table_to_join
-        $sql = "SELECT * FROM `".$targetModel::TABLE_NAME."` as `t`"." WHERE `t`.`".$primaryColumn."` = ?";
+        $sqlStart = "SELECT * FROM `".$targetModel::TABLE_NAME."` as `primary_table`";
+        $sqlRelations = $this->getRelationSql($targetModelName);
+        $sqlWhere = " WHERE `primary_table`.`".$primaryColumn."` = ?";
 
+        $sql = $sqlStart.$sqlRelations.$sqlWhere;
         $targetModel = $this->executeSql($sql, array($primaryModel->$primaryColumn));
         return $this->mapRowToModel($targetModel, $targetModelName);
+    }
+
+    /**
+     * Generates required sql for 'hasOne' relations
+     *
+     * @param string $modelName
+     * @param string $joinTable
+     * @return string
+     * @see https://github.com/Crecket/todo/issues/12
+     */
+    private function getRelationSql(string $modelName = null, string $joinTable = "primary_table")
+    {
+        if (is_null($modelName)) {
+            $modelName = $this->modelName;
+        }
+
+        /** @var Model $model */
+        $model = new $modelName;
+
+        $relations = $model->getRelations();
+        if (empty($relations["has_one"])) {
+            return " ";
+        }
+
+        $relationSql = "";
+        foreach ($relations["has_one"] as $targetRelation => $relationColumn) {
+            /** @var Model $model */
+            $targetModel = new $targetRelation;
+
+            // create the inner join sql part
+            $relationSql .= " INNER JOIN `".$targetModel::TABLE_NAME."` ON ".
+                "`$joinTable`.`$relationColumn` = `".$targetModel::TABLE_NAME."`.`id`";
+
+            // check for child relations
+            $targetRelations = $targetModel->getRelations();
+            if (!empty($targetRelations['has_one'])) {
+                // target relations has child relations
+                $relationSql .= $this->getRelationSql($targetRelation, $targetModel::TABLE_NAME);
+            }
+        }
+
+        return $relationSql;
     }
 
     /**

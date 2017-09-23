@@ -36,4 +36,18 @@ class User extends Model
             ]
         ];
     }
+
+    /**
+     *
+     */
+    public function getColumns(): array
+    {
+        return [
+            'id',
+            'username',
+            'email',
+            'password',
+            'usergroup_id'
+        ];
+    }
 }
