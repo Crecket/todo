@@ -89,6 +89,7 @@ class Application
         $router->put("/update", "ToDoController::update");
 
         $router->get("/test", "TestController::test");
+        $router->get("/test2", "TestController::testSecond");
 
         $router->error(PageNotFoundException::class, "ErrorController::error404");
         $router->error(PermissionDeniedException::class, "ErrorController::error403");

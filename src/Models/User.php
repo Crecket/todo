@@ -14,6 +14,8 @@ class User extends Model
     public $email;
     /** @var string $password */
     public $password;
+    /** @var int $usergroup_id */
+    public $usergroup_id;
 
     /**
      * @return int
@@ -21,5 +23,17 @@ class User extends Model
     public function primary()
     {
         return $this->id;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRelations(): array
+    {
+        return [
+            'has_one' => [
+                UserGroup::class => 'usergroup_id'
+            ]
+        ];
     }
 }

@@ -6,10 +6,15 @@ use Greg\ToDo\Models\ToDo;
 use Greg\ToDo\Models\ToDoComment;
 use Greg\ToDo\Repositories\ToDoCommentRepository;
 use Greg\ToDo\Repositories\ToDoRepository;
+use Greg\ToDo\Repositories\UserRepository;
 
 class TestController extends Controller
 {
-
+    /**
+     * @param \Twig_Environment $twig
+     * @return null
+     * @throws \Exception
+     */
     public function test(\Twig_Environment $twig)
     {
         /** @var ToDoRepository $repository */
@@ -38,6 +43,15 @@ class TestController extends Controller
             $todoCommentsFinal,
             $todosFinal
         ));
+        return null;
+    }
+
+    public function testSecond(\Twig_Environment $twig)
+    {
+        /** @var UserRepository $repository */
+        $repository = $this->container->get("repositories.user_repository");
+        $user = $repository->findBy('id', 1);
+        var_dump($user);
         return null;
     }
 

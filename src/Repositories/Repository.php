@@ -10,7 +10,6 @@ use Greg\ToDo\Models\Model;
 abstract class Repository
 {
     const TABLE_NAME = "";
-    const PRIMARY_KEY = "id";
 
     /** @var Database $database */
     protected $database;
@@ -28,8 +27,7 @@ abstract class Repository
 
     /**
      * @param $value
-     *
-     * @return mixed
+     * @return bool|Model
      */
     public function find($value)
     {
@@ -37,10 +35,17 @@ abstract class Repository
             $value = $value->primary();
         }
 
-        $sql = 'SELECT * FROM '.static::TABLE_NAME.' WHERE '.static::PRIMARY_KEY.' = :value';
+        $sql = "SELECT *, `primary_table`.`id` FROM `".static::TABLE_NAME."` as `primary_table`";
 
-        $prepare = $this->database->connection->prepare($sql);
-        $prepare->bindValue(':value', $value);
+        // generate the relations sql
+        $sqlRelations = $this->getRelationSql();
+
+        // where statement to fetch the correct item
+        $sqlWhere = " WHERE `primary_table`.`id` = :value";
+
+        // execute the query
+        $prepare = $this->database->connection->prepare($sql.$sqlRelations.$sqlWhere);
+        $prepare->bindValue(":value", $value);
         $prepare->execute();
         $row = $prepare->fetch(\PDO::FETCH_ASSOC);
 
@@ -52,28 +57,28 @@ abstract class Repository
     }
 
     /**
-     * @param $key string
-     * @param $value mixed
-     * @param $single boolean
-     * @return array
+     * @param string $column
+     * @param $value
+     * @return bool|Model
      */
-    public function findBy(string $key, $value, $single = false)
+    public function findBy(string $column, $value)
     {
         if ($value instanceof Model) {
             $value = $value->primary();
         }
 
-        $prepare = $this->database->connection->prepare('SELECT * FROM '.static::TABLE_NAME.' WHERE '.$key.' = :value');
-        $prepare->bindValue(':value', $value);
-        $prepare->execute();
+        $sql = "SELECT *, `primary_table`.`id` FROM `".static::TABLE_NAME."` as `primary_table`";
 
-        if ($single) {
-            $row = $prepare->fetch(\PDO::FETCH_ASSOC);
-            if ($row === false) {
-                return false;
-            }
-            return $this->mapRowToModel($row);
-        }
+        // generate the relations sql
+        $sqlRelations = $this->getRelationSql();
+
+        // where statement to fetch the correct item
+        $sqlWhere = " WHERE `primary_table`.`".$column."` = :value";
+
+        // execute the query
+        $prepare = $this->database->connection->prepare($sql.$sqlRelations.$sqlWhere);
+        $prepare->bindValue(":value", $value);
+        $prepare->execute();
 
         $data = $prepare->fetchAll(\PDO::FETCH_ASSOC);
         return $this->mapDataToModel($data);
@@ -84,9 +89,39 @@ abstract class Repository
      */
     public function all()
     {
-        $prepare = $this->database->connection->query('SELECT * FROM '.static::TABLE_NAME);
-        $data = $prepare->fetchAll(\PDO::FETCH_ASSOC);
-        return $this->mapDataToModel($data);
+        $sql = "SELECT *, `primary_table`.`id` FROM `".static::TABLE_NAME."` as `primary_table`";
+        $sql .= $this->getRelationSql();
+
+        $query = $this->database->connection->query($sql);
+
+        return $this->mapDataToModel(
+            $query->fetchAll(\PDO::FETCH_ASSOC)
+        );
+    }
+
+    /**
+     * @return string
+     */
+    public function getRelationSql()
+    {
+        /** @var Model $model */
+        $model = new $this->modelName;
+
+        $relations = $model->getRelations();
+        if (empty($relations["has_one"])) {
+            return " ";
+        }
+
+        $relationSql = "";
+        foreach ($relations["has_one"] as $targetRelation => $relationColumn) {
+            /** @var Model $model */
+            $targetModel = new $targetRelation;
+
+            $relationSql .= " INNER JOIN `".$targetModel::TABLE_NAME."` ON ".
+                "`primary_table`.`".$relationColumn."` = `".$targetModel::TABLE_NAME."`.`id`";
+        }
+
+        return $relationSql;
     }
 
     /**
@@ -95,10 +130,10 @@ abstract class Repository
      */
     public function delete(Model $model)
     {
-        $sql = 'DELETE FROM '.static::TABLE_NAME.' WHERE '.static::PRIMARY_KEY.' = :value';
+        $sql = "DELETE FROM `".static::TABLE_NAME."` WHERE `id` = :value";
 
         $prepare = $this->database->connection->prepare($sql);
-        $prepare->bindValue(':value', $model->primary());
+        $prepare->bindValue(":value", $model->primary());
         $prepare->execute();
 
         return $prepare->rowCount();
@@ -110,8 +145,8 @@ abstract class Repository
      */
     public function insert(Model $model)
     {
-        $sql = 'INSERT INTO '.static::TABLE_NAME.' ( ';
-        $sql_questionmarks = '';
+        $sql = "INSERT INTO ".static::TABLE_NAME." ( ";
+        $sql_questionmarks = "";
         $column_values = array();
 
         // get all properties from the model
@@ -124,17 +159,17 @@ abstract class Repository
             }
 
             if (!$first) {
-                $sql .= ', ';
-                $sql_questionmarks .= ', ';
+                $sql .= ", ";
+                $sql_questionmarks .= ", ";
             }
             $first = false;
 
             $sql .= "`".$columnName."`";
-            $sql_questionmarks .= ' ?';
+            $sql_questionmarks .= " ?";
 
             $column_values[] = $columnValue;
         }
-        $sql .= ') VALUES ('.$sql_questionmarks.')';
+        $sql .= ") VALUES (".$sql_questionmarks.")";
 
         $prepare = $this->database->connection->prepare($sql);
         $prepare->execute($column_values);
@@ -147,7 +182,7 @@ abstract class Repository
      */
     public function update(Model $model)
     {
-        $sql = 'UPDATE '.static::TABLE_NAME.' SET ';
+        $sql = "UPDATE ".static::TABLE_NAME." SET ";
         $column_values = array();
 
         // get all properties from the model
@@ -155,21 +190,21 @@ abstract class Repository
 
         $first = true;
         foreach ($properties as $columnName => $columnValue) {
-            if ($columnName === static::PRIMARY_KEY) {
+            if ($columnName === "id") {
                 continue;
             }
 
             if (!$first) {
-                $sql .= ', ';
+                $sql .= ", ";
             }
             $first = false;
 
-            $sql .= "`".$columnName.'` = ?';
+            $sql .= "`".$columnName."` = ?";
 
             $column_values[] = $columnValue;
         }
 
-        $sql .= ' WHERE `'.static::PRIMARY_KEY.'` = ?';
+        $sql .= " WHERE `id` = ?";
         $column_values[] = $model->primary();
 
         $prepare = $this->database->connection->prepare($sql);
@@ -193,15 +228,15 @@ abstract class Repository
         }
 
         $primaryRelations = $primaryModel->getRelations();
-        if (!isset($primaryRelations['has_many'][$targetModelName])) {
+        if (!isset($primaryRelations["has_many"][$targetModelName])) {
             throw new RelationNotFoundException();
         }
 
         // get the targetted column from the target model
-        $targetColumn = $primaryRelations['has_many'][$targetModelName];
+        $targetColumn = $primaryRelations["has_many"][$targetModelName];
 
         // Select from current model and join on $table_to_join
-        $sql = 'SELECT * FROM `'.$targetModel::TABLE_NAME.'` as `t`'.'WHERE `t`.`'.$targetColumn.'` = ?';
+        $sql = "SELECT * FROM `".$targetModel::TABLE_NAME."` as `t`"."WHERE `t`.`".$targetColumn."` = ?";
 
         $targetModels = $this->executeSql($sql, array($primaryModel->primary()), false);
         return $this->mapDataToModel($targetModels, $targetModelName);
@@ -223,23 +258,53 @@ abstract class Repository
         }
 
         $primaryRelations = $primaryModel->getRelations();
-        if (!isset($primaryRelations['belongs_to'][$targetModelName])) {
+        if (!isset($primaryRelations["belongs_to"][$targetModelName])) {
             throw new RelationNotFoundException();
         }
         $targetRelations = $targetModel->getRelations();
-        if (!isset($targetRelations['has_many'][get_class($primaryModel)])) {
+        if (!isset($targetRelations["has_many"][get_class($primaryModel)])) {
             throw new RelationNotFoundException();
         }
 
         // get the targetted column from the target model
-        $primaryColumn = $targetRelations['has_many'][get_class($primaryModel)];
-        $targetColumn = $primaryRelations['belongs_to'][$targetModelName];
+        $primaryColumn = $targetRelations["has_many"][get_class($primaryModel)];
+        $targetColumn = $primaryRelations["belongs_to"][$targetModelName];
 
         // Select from current model and join on $table_to_join
-        $sql = 'SELECT * FROM `'.$targetModel::TABLE_NAME.'` as `t`'.' WHERE `t`.`'.$targetColumn.'` = ?';
+        $sql = "SELECT * FROM `".$targetModel::TABLE_NAME."` as `t`"." WHERE `t`.`".$targetColumn."` = ?";
 
         $targetModels = $this->executeSql($sql, array($primaryModel->$primaryColumn), false);
         return $this->mapDataToModel($targetModels, $targetModelName);
+    }
+
+    /**
+     * @param Model $primaryModel
+     * @param string $targetModelName
+     * @return Model
+     * @throws InvalidTargetModelGiven
+     * @throws RelationNotFoundException
+     */
+    public function hasOne(Model $primaryModel, string $targetModelName)
+    {
+        /** @var Model $targetModelInstance */
+        $targetModel = new $targetModelName;
+        if (!$targetModel instanceof Model) {
+            throw new InvalidTargetModelGiven();
+        }
+
+        $primaryRelations = $primaryModel->getRelations();
+        if (!isset($primaryRelations["has_one"][$targetModelName])) {
+            throw new RelationNotFoundException();
+        }
+
+        // get the targetted column from the target model
+        $primaryColumn = $primaryRelations["has_one"][$targetModelName];
+
+        // Select from current model and join on $table_to_join
+        $sql = "SELECT * FROM `".$targetModel::TABLE_NAME."` as `t`"." WHERE `t`.`".$primaryColumn."` = ?";
+
+        $targetModel = $this->executeSql($sql, array($primaryModel->$primaryColumn));
+        return $this->mapRowToModel($targetModel, $targetModelName);
     }
 
     /**
