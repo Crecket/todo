@@ -13,7 +13,7 @@ class Router
     /** @var string */
     private $method = "";
     /** @var Route[] $routes */
-    private $routes;
+    private $routes = [];
     /** @var ErrorHandler[] $errorHandlers */
     private $errorHandlers;
     /** @var \Twig_Environment $twig */

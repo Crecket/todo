@@ -1,6 +1,7 @@
 imports:
     - parameters.yaml
     - services.yaml
+    - routing.yaml
     - security.yaml
 
 application:
