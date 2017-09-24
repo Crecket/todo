@@ -2,7 +2,8 @@
 
 namespace Greg\ToDo\Authentication;
 
-use Greg\ToDo\Config;
+use Greg\ToDo\Authentication\Providers\AuthenticationProviderInterface;
+use Greg\ToDo\DependencyInjection\Container;
 use Greg\ToDo\Exceptions\ClassNotFoundException;
 use Greg\ToDo\Exceptions\ConfigItemNotFoundException;
 use Greg\ToDo\Exceptions\InvalidConfigurationException;
@@ -11,8 +12,8 @@ use Greg\ToDo\Http\Router;
 
 class ProviderHandler
 {
-    /** @var Config $config */
-    private $config;
+    /** @var Container $container */
+    private $container;
     /** @var string $userModel */
     private $userModel;
     /** @var array $providers */
@@ -20,11 +21,11 @@ class ProviderHandler
 
     /**
      * ProviderRegistration constructor.
-     * @param Config $config
+     * @param Container $container
      */
-    public function __construct(Config $config)
+    public function __construct(Container $container)
     {
-        $this->config = $config;
+        $this->container = $container;
         $this->initialConfiguration();
     }
 
@@ -44,13 +45,18 @@ class ProviderHandler
 
             // default method to GET
             $matchMethod = $provider['match']['method'] ?? array("GET");
-            $matchUrl = (array)$provider['match']['url'];
+            $matchUrl = (array)$provider['match']['url'] ?? [];
 
             $routeMatcher = new RouteMatcher($router->getUrl(), $router->getMethod());
-            if($routeMatcher->match($matchUrl, $matchMethod)){
-
+            if (!$routeMatcher->match($matchUrl, $matchMethod)) {
+                continue;
             }
 
+            /** @var AuthenticationProviderInterface $providerInstance */
+            $providerInstance = new $provider['class']($this->container);
+            if (!$providerInstance->check((array)$provider['options'])) {
+                continue;
+            }
         }
     }
 
@@ -59,12 +65,12 @@ class ProviderHandler
      */
     private function initialConfiguration()
     {
-        $this->userModel = $this->config->get("security.authentication.user_model", true);
+        $this->userModel = $this->container->getConfig()->get("security.authentication.user_model", true);
         if (!class_exists($this->userModel)) {
             throw new ClassNotFoundException("The configured user_model class does not exist");
         }
 
-        $providers = $this->config->get("security.authentication.providers");
+        $providers = (array)$this->container->getConfig()->get("security.authentication.providers");
         foreach ($providers as $providerName => $provider) {
             $this->setupProvider($providerName, $provider);
         }

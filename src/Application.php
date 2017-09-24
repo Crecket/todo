@@ -121,7 +121,7 @@ class Application
      */
     private function registerAuthenticationProviders(): ProviderHandler
     {
-        $registration = new ProviderHandler($this->config);
+        $registration = new ProviderHandler($this->container);
         return $registration;
     }
 

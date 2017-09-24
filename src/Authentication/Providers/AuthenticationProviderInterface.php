@@ -2,9 +2,11 @@
 
 namespace Greg\ToDo\Authentication\Providers;
 
+use Greg\ToDo\Models\Model;
+
 interface AuthenticationProviderInterface
 {
-    public function setMatchConfig();
+    public function check(array $options): bool;
 
-    public function match(string $url, string $method);
+    public function getUser(): ?Model;
 }

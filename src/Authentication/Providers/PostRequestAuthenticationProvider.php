@@ -2,15 +2,17 @@
 
 namespace Greg\ToDo\Authentication\Providers;
 
-class PostRequestAuthenticationProvider implements AuthenticationProviderInterface
+use Greg\ToDo\Models\Model;
+
+class PostRequestAuthenticationProvider extends Provider
 {
-    public function setMatchConfig()
+    public function check(array $options): bool
     {
-        // TODO: Implement setMatchConfig() method.
+        // TODO: Implement check() method.
     }
 
-    public function match(string $url, string $method)
+    public function getUser(): ?Model
     {
-        // TODO: Implement match() method.
+        // TODO: Implement getUser() method.
     }
 }
