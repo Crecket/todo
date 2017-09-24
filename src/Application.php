@@ -83,19 +83,23 @@ class Application
     {
         $router = new Router($this->container);
 
-        $router->get("/", "ToDoController::home");
-        $router->post("/add", "ToDoController::add");
-        $router->delete("/delete", "ToDoController::delete");
-        $router->put("/update", "ToDoController::update");
-        $router->put("/complete", "ToDoController::complete");
+        $routing = $this->config->get("routing");
+        $routes = $routing['routes'] ?? [];
+        $exceptions = $routing['exceptions'] ?? [];
 
-        $router->get("/test", "TestController::test");
-        $router->get("/test2", "TestController::testSecond");
+        // register the routes and exceptions from the configuration
+        foreach ($routes as $route) {
+            $router->register($route['url'], (array)$route['method'], $route['callback']);
+        }
 
-        $router->error(PageNotFoundException::class, "ErrorController::error404");
-        $router->error(PermissionDeniedException::class, "ErrorController::error403");
-        $router->error(BadRequestException::class, "ErrorController::error400");
-        $router->error(\Exception::class, "ErrorController::error500")->setStrictMode(false);
+        foreach ($exceptions as $exception) {
+            $exceptionHandler = $router->error($exception['exception'], $exception['callback']);
+
+            // check if strict mode was set
+            $exceptionHandler->setStrictMode($exception['strict'] ?? false);
+        }
+
+        /* PLACE HARDCODED ROUTES HERE */
 
         return $router;
     }

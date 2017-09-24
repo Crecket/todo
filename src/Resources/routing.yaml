@@ -1,16 +1,16 @@
 routing:
     routes:
-        - { method: "GET", url: "/", callback: "ToDoController::home" }
-        - { method: "POST", url: "/add", callback: "ToDoController::add" }
-        - { method: "DELETE", url: "/delete", callback: "ToDoController::delete" }
-        - { method: "PUT", url: "/update", callback: "ToDoController::update" }
-        - { method: "PUT", url: "/complete", callback: "ToDoController::complete" }
+        - { method: 'GET', url: '/', callback: 'ToDoController::home' }
+        - { method: 'POST', url: '/add', callback: 'ToDoController::add' }
+        - { method: 'DELETE', url: '/delete', callback: 'ToDoController::delete' }
+        - { method: 'PUT', url: '/update', callback: 'ToDoController::update' }
+        - { method: 'PUT', url: '/complete', callback: 'ToDoController::complete' }
 
-        - { method: "GET", url: "/test", callback: "TestController::test" }
-        - { method: "GET", url: "/test2", callback: "TestController::testSecond" }
+        - { method: 'GET', url: '/test', callback: 'TestController::test' }
+        - { method: 'GET', url: '/test2', callback: 'TestController::testSecond' }
 
     exceptions:
-        - { exception: "Greg\\ToDo\\Exceptions\\Http\\PageNotFoundException", callback: "ErrorController::error404" }
-        - { exception: "Greg\\ToDo\\Exceptions\\Http\\PermissionDeniedException", callback: "ErrorController::error403" }
-        - { exception: "Greg\\ToDo\\Exceptions\\Http\\BadRequestException", callback: "ErrorController::error400" }
-        - { exception: "Exception", callback: "ErrorController::error500", strict: true }
+        - { exception: '\Greg\ToDo\Exceptions\Http\PageNotFoundException', callback: 'ErrorController::error404' }
+        - { exception: '\Greg\ToDo\Exceptions\Http\PermissionDeniedException', callback: 'ErrorController::error403' }
+        - { exception: '\Greg\ToDo\Exceptions\Http\BadRequestException', callback: 'ErrorController::error400' }
+        - { exception: '\Exception', callback: 'ErrorController::error500', strict: true }

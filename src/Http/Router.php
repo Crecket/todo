@@ -124,7 +124,7 @@ class Router
      * @param $callback
      * @return Route|string
      */
-    private function register(string $route, array $methods, $callback)
+    public function register(string $route, array $methods, $callback)
     {
         $route = new Route($this->container, $route, $methods, $callback);
         $this->routes[] = $route;

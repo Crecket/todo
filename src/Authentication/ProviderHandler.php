@@ -83,6 +83,7 @@ class ProviderHandler
         }
 
         $className = $provider['class'];
+
         if (!class_exists($className)) {
             throw new ClassNotFoundException();
         }
