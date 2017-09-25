@@ -2,7 +2,7 @@
 
 namespace Greg\ToDo\Authentication;
 
-use Greg\ToDo\Authentication\Providers\AuthenticationProviderInterface;
+use Greg\ToDo\Authentication\Providers\Provider;
 use Greg\ToDo\DependencyInjection\Container;
 use Greg\ToDo\Exceptions\ClassNotFoundException;
 use Greg\ToDo\Exceptions\ConfigItemNotFoundException;
@@ -31,9 +31,10 @@ class ProviderHandler
 
     /**
      * @param Router $router
+     * @return Provider|null
      * @throws InvalidConfigurationException
      */
-    public function checkProviders(Router $router)
+    public function checkProviders(Router $router): ?Provider
     {
         foreach ($this->providers as $providerName => $provider) {
             if (empty($provider['match'])) {
@@ -52,12 +53,15 @@ class ProviderHandler
                 continue;
             }
 
-            /** @var AuthenticationProviderInterface $providerInstance */
+            /** @var Provider $providerInstance */
             $providerInstance = new $provider['class']($this->container);
-            if (!$providerInstance->check((array)$provider['options'])) {
+            if (!$providerInstance->check()) {
                 continue;
             }
+
+            return $providerInstance;
         }
+        return null;
     }
 
     /**

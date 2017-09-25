@@ -1,0 +1,47 @@
+{% extends 'bootstrap.twig' %}
+
+{% block body %}
+    <div class="container">
+        <div class="card darken-1">
+            <form method="post" action="/add">
+                <div class="card-content">
+                    <span class="card-title">Login</span>
+
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input id="username" name="username" type="text" class="validate" required>
+                            <label for="username">Username</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input id="password" name="password" type="text" class="validate" required>
+                            <label for="password">Password</label>
+                        </div>
+                    </div>
+
+
+                <div class="card-action">
+                    <button class="modal-action modal-close waves-effect waves-green btn-flat green">
+                        Login
+                    </button>
+                </div>
+            </form>
+        </div>
+
+
+    </div>
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script async defer>
+        $('.modal').modal();
+        $('.datepicker').pickadate();
+        $('.timepicker').pickatime({
+            twelvehour: false
+        });
+        $('select').material_select();
+    </script>
+{% endblock %}

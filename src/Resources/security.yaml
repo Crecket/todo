@@ -28,6 +28,3 @@ security:
                 match:
                     method: 'ANY'
                     url: '*'
-                options:
-                    # force check causes the provider to re-check the database on every request
-                    force_check: true

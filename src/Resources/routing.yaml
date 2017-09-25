@@ -6,6 +6,9 @@ routing:
         - { method: 'PUT', url: '/update', callback: 'ToDoController::update' }
         - { method: 'PUT', url: '/complete', callback: 'ToDoController::complete' }
 
+        - { method: 'GET', url: '/login', callback: 'UserController::login' }
+        - { method: 'POST', url: '/login', callback: 'UserController::login' }
+
         - { method: 'GET', url: '/test', callback: 'TestController::test' }
         - { method: 'GET', url: '/test2', callback: 'TestController::testSecond' }
 

@@ -4,36 +4,38 @@ namespace Greg\ToDo\Authentication\Providers;
 
 use Greg\ToDo\Models\Model;
 use Greg\ToDo\Models\User;
+use Greg\ToDo\Repositories\UserRepository;
 
 class SessionAuthenticationProvider extends Provider
 {
-    /** @var array $options */
-    private $options = [];
-    /** @var bool $forceCheck */
-    private $forceCheck = false;
     /** @var null|User $user */
     private $user;
 
     /**
-     * @param array $options
      * @return bool
      */
-    public function check(array $options): bool
+    public function check(): bool
     {
-        $this->options = $options;
-        $this->forceCheck = $options['force_check'] ?? false;
-
         if (empty($_SERVER['user'])) {
             return false;
         }
 
+        /** @var UserRepository $userRepository */
+        $userRepository = $this->container->get("repositories.user_repository");
 
+        $user = $userRepository->find($_SESSION['user']['id']);
+        if (!$user instanceof User) {
+            return false;
+        }
+
+        $_SESSION['user'] = $user;
+        $this->user = $user;
 
         return true;
     }
 
     public function getUser(): ?Model
     {
-        // TODO: Implement getUser() method.
+        return $this->user;
     }
 }
