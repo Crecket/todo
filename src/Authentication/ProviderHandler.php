@@ -7,6 +7,7 @@ use Greg\ToDo\DependencyInjection\Container;
 use Greg\ToDo\Exceptions\ClassNotFoundException;
 use Greg\ToDo\Exceptions\ConfigItemNotFoundException;
 use Greg\ToDo\Exceptions\InvalidConfigurationException;
+use Greg\ToDo\Http\Request;
 use Greg\ToDo\Http\RouteMatcher;
 use Greg\ToDo\Http\Router;
 
@@ -30,11 +31,11 @@ class ProviderHandler
     }
 
     /**
-     * @param Router $router
+     * @param Request $request
      * @return Provider|null
      * @throws InvalidConfigurationException
      */
-    public function checkProviders(Router $router): ?Provider
+    public function checkProviders(Request $request): ?Provider
     {
         foreach ($this->providers as $providerName => $provider) {
             if (empty($provider['match'])) {
@@ -48,7 +49,7 @@ class ProviderHandler
             $matchMethod = $provider['match']['method'] ?? array("GET");
             $matchUrl = (array)$provider['match']['url'] ?? [];
 
-            $routeMatcher = new RouteMatcher($router->getUrl(), $router->getMethod());
+            $routeMatcher = new RouteMatcher($request);
             if (!$routeMatcher->match($matchUrl, $matchMethod)) {
                 continue;
             }

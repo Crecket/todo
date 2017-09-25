@@ -4,20 +4,16 @@ namespace Greg\ToDo\Http;
 
 class RouteMatcher
 {
-    /** @var string $url */
-    private $url;
-    /** @var string $method */
-    private $method;
+    /** @var Request $request */
+    private $request;
 
     /**
      * RouteMatcher constructor.
-     * @param string $url
-     * @param string $method
+     * @param Request $request
      */
-    public function __construct(string $url, string $method)
+    public function __construct(Request $request)
     {
-        $this->url = $url;
-        $this->method = $method;
+        $this->request = $request;
     }
 
     /**
@@ -46,7 +42,7 @@ class RouteMatcher
             if ($method === "ANY") {
                 return true;
             }
-            if ($method === $this->method) {
+            if ($method === $this->request->getMethod()) {
                 return true;
             }
         }
@@ -63,7 +59,7 @@ class RouteMatcher
             if ($url === "*") {
                 return true;
             }
-            if ($url === $this->url) {
+            if ($url === $this->request->getUrl()) {
                 return true;
             }
         }

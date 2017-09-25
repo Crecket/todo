@@ -8,10 +8,8 @@ use Greg\ToDo\Exceptions\Http\PageNotFoundException;
 
 class Router
 {
-    /** @var string */
-    private $url = "";
-    /** @var string */
-    private $method = "";
+    /** @var Request $request */
+    private $request;
     /** @var Route[] $routes */
     private $routes = [];
     /** @var ErrorHandler[] $errorHandlers */
@@ -20,39 +18,24 @@ class Router
     private $twig;
     /** @var Container $container */
     private $container;
+    /** @var string[] */
+    private $middleware;
 
     /**
      * Router constructor.
      * @param Container $container
-     * @param bool $url
-     * @param bool $method
+     * @param bool|Request $request
      */
-    public function __construct(Container $container, $url = false, $method = false)
+    public function __construct(Container $container, $request = false)
     {
         $this->container = $container;
+        $this->request = $request === false ? new Request() : $request;
 
         $loader = new \Twig_Loader_Filesystem(__DIR__.'/../Views');
         $this->twig = new \Twig_Environment($loader, array(
             "debug" => $this->container->getConfig()->get('application.debug')
         ));
         $this->twig->addExtension(new \Twig_Extension_Debug());
-
-        $this->url = $url === false ? ($_SERVER['REQUEST_URI'] ?? "") : $url;
-        $this->method = $method === false ? ($_SERVER['REQUEST_METHOD'] ?? "") : $method;
-
-        if (!empty($_POST['_method'])) {
-            switch (strtoupper($_POST['_method'])) {
-                case 'PUT':
-                    $this->method = "PUT";
-                    break;
-                case 'DELETE':
-                    $this->method = "DELETE";
-                    break;
-                default:
-                    $this->method = "POST";
-                    break;
-            }
-        }
     }
 
     /**
@@ -119,15 +102,28 @@ class Router
     }
 
     /**
+     * @param string $name
+     * @param string $class
+     */
+    public function middleware(string $name, string $class)
+    {
+        $middleware[$name] = $class;
+    }
+
+    /**
      * @param string $route
      * @param array $methods
      * @param $callback
+     * @param array $middleware
      * @return Route|string
      */
-    public function register(string $route, array $methods, $callback)
+    public function register(string $route, array $methods, $callback, array $middleware = [])
     {
+        $routeKey = $this->uniqueRouteKey($route, $methods);
         $route = new Route($this->container, $route, $methods, $callback);
-        $this->routes[] = $route;
+
+        $this->routes[$routeKey] = $route;
+
         return $route;
     }
 
@@ -140,37 +136,48 @@ class Router
         try {
             /** @var Route $route */
             foreach ($this->routes as $route) {
-                $routeMatcher = new RouteMatcher($this->url, $this->method);
-                if ($route->isMatch($routeMatcher)) {
-                    $response = $route->run($this->twig);
+                $routeMatcher = new RouteMatcher($this->request);
 
-                    if ($response instanceof Redirect) {
-                        $response->redirect();
-                        exit;
-                    }
-
-                    return $this->finish($response);
+                if (!$route->isMatch($routeMatcher)) {
+                    continue;
                 }
+                $response = $route->run($this->twig);
+
+                if ($response instanceof Redirect) {
+                    $response->redirect();
+                    exit; // prevent more actions from being taken
+                }
+
+                return $this->finish($response);
             }
 
             throw new PageNotFoundException();
         } catch (\Exception $exception) {
             /** @var ErrorHandler $errorHandler */
             foreach ($this->errorHandlers as $errorHandler) {
-                if ($errorHandler->isMatch($exception)) {
-                    $response = $errorHandler->run($this->twig, $exception);
 
-                    if ($response instanceof Redirect) {
-                        $response->redirect();
-                        exit;
-                    }
-
-                    return $this->finish($response);
+                if (!$errorHandler->isMatch($exception)) {
+                    continue;
                 }
+                $response = $errorHandler->run($this->twig, $exception);
+
+                if ($response instanceof Redirect) {
+                    $response->redirect();
+                    exit; // prevent more actions from being taken
+                }
+
+                return $this->finish($response);
             }
 
             // rethrow Exception if no matches are found
             throw $exception;
+        }
+    }
+
+    private function registerMiddleware(array $middlewares)
+    {
+        foreach ($middlewares as $middleware) {
+
         }
     }
 
@@ -187,19 +194,11 @@ class Router
     }
 
     /**
-     * @return string
+     * @return Request
      */
-    public function getUrl(): string
+    public function getRequest(): Request
     {
-        return $this->url;
-    }
-
-    /**
-     * @return string
-     */
-    public function getMethod(): string
-    {
-        return $this->method;
+        return $this->request;
     }
 
     /**
@@ -210,4 +209,13 @@ class Router
         return $this->routes;
     }
 
+    /**
+     * @param string $url
+     * @param array $methods
+     * @return string
+     */
+    private function uniqueRouteKey(string $url, array $methods): string
+    {
+        return hash("sha256", $url.serialize($methods));
+    }
 }

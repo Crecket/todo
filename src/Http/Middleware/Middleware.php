@@ -7,9 +7,9 @@ use Greg\ToDo\DependencyInjection\Container;
 abstract class Middleware implements MiddlewareInterface
 {
     /** @var Container $container */
-    public $container;
+    protected $container;
     /** @var object|string $callback */
-    public $callback;
+    protected $callback;
 
     /**
      * Route constructor.
@@ -20,15 +20,5 @@ abstract class Middleware implements MiddlewareInterface
     {
         $this->container = $container;
         $this->callback = $callback;
-    }
-
-    /**
-     * @param \Twig_Environment $twig
-     * @return mixed
-     */
-    public function run(\Twig_Environment $twig)
-    {
-        $callbackHandler = new CallbackHandler($this->container);
-        return $callbackHandler->run($this->callback, array($twig));
     }
 }

@@ -2,17 +2,20 @@ routing:
     routes:
         - { method: 'GET', url: '/', callback: 'HomeController::index' }
 
-        - { method: 'GET', url: '/home', callback: 'ToDoController::home', middleware: 'AuthOnlyMiddleware' }
-        - { method: 'POST', url: '/add', callback: 'ToDoController::add', middleware: 'AuthOnlyMiddleware' }
-        - { method: 'DELETE', url: '/delete', callback: 'ToDoController::delete', middleware: 'AuthOnlyMiddleware' }
-        - { method: 'PUT', url: '/update', callback: 'ToDoController::update', middleware: 'AuthOnlyMiddleware' }
-        - { method: 'PUT', url: '/complete', callback: 'ToDoController::complete', middleware: 'AuthOnlyMiddleware' }
+        - { method: 'GET', url: '/home', callback: 'ToDoController::home', middleware: 'authenticated_only' }
+        - { method: 'POST', url: '/add', callback: 'ToDoController::add', middleware: 'authenticated_only' }
+        - { method: 'DELETE', url: '/delete', callback: 'ToDoController::delete', middleware: 'authenticated_only' }
+        - { method: 'PUT', url: '/update', callback: 'ToDoController::update', middleware: 'authenticated_only' }
+        - { method: 'PUT', url: '/complete', callback: 'ToDoController::complete', middleware: 'authenticated_only' }
 
         - { method: 'GET', url: '/login', callback: 'UserController::index' }
         - { method: 'POST', url: '/login', callback: 'UserController::login' }
 
         - { method: 'GET', url: '/test', callback: 'TestController::test' }
         - { method: 'GET', url: '/test2', callback: 'TestController::testSecond' }
+
+    middlewares:
+        authenticated_only: '\Greg\ToDo\Http\Middleware\AuthOnlyMiddleware'
 
     exceptions:
         - { exception: '\Greg\ToDo\Exceptions\Http\PageNotFoundException', callback: 'ErrorController::error404' }

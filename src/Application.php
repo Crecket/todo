@@ -9,6 +9,7 @@ use Greg\ToDo\DependencyInjection\Container;
 use Greg\ToDo\Exceptions\Http\BadRequestException;
 use Greg\ToDo\Exceptions\Http\PageNotFoundException;
 use Greg\ToDo\Exceptions\Http\PermissionDeniedException;
+use Greg\ToDo\Http\Request;
 use Greg\ToDo\Http\Response;
 use Greg\ToDo\Http\Router;
 
@@ -42,6 +43,7 @@ class Application
             $this->consoleHandler = $this->registerConsoleCommands();
         }
 
+        // register authentication providers and routes
         $this->router = $this->registerRoutes();
         $this->providerHandler = $this->registerAuthenticationProviders();
     }
@@ -59,7 +61,7 @@ class Application
         session_start();
 
         // run the registered authentication providers
-        $this->providerHandler->checkProviders($this->router);
+        $this->providerHandler->checkProviders($this->router->getRequest());
 
         /** @var Response $response */
         $response = $this->router->run();
@@ -86,17 +88,26 @@ class Application
         $routing = $this->config->get("routing");
         $routes = $routing['routes'] ?? [];
         $exceptions = $routing['exceptions'] ?? [];
+        $middlewares = $routing['middlewares'] ?? [];
 
-        // register the routes and exceptions from the configuration
+        // register the routes
         foreach ($routes as $route) {
-            $routeObject = $router->register($route['url'], (array)$route['method'], $route['callback']);
-            // add middleware to the router if any are set
-            $routeObject->setMiddleware((array)$route['middleware'] ?? []);
+            $router->register(
+                $route['url'],
+                (array)$route['method'],
+                $route['callback'],
+                (array)($route['middleware'] ?? [])
+            );
         }
 
+        // register the middlewares
+        foreach ($middlewares as $middlewareKey => $middlewareClass) {
+            $router->middleware($middlewareKey, $middlewareClass);
+        }
+
+        // register the exceptions
         foreach ($exceptions as $exception) {
             $exceptionHandler = $router->error($exception['exception'], $exception['callback']);
-
             // check if strict mode was set
             $exceptionHandler->setStrictMode($exception['strict'] ?? false);
         }
