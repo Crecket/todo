@@ -37,8 +37,8 @@ class Router
         ));
         $this->twig->addExtension(new \Twig_Extension_Debug());
 
-        $this->url = $url === false ? $_SERVER['REQUEST_URI'] : $url;
-        $this->method = $method === false ? $_SERVER['REQUEST_METHOD'] : $method;
+        $this->url = $url === false ? ($_SERVER['REQUEST_URI'] ?? "") : $url;
+        $this->method = $method === false ? ($_SERVER['REQUEST_METHOD'] ?? "") : $method;
 
         if (!empty($_POST['_method'])) {
             switch (strtoupper($_POST['_method'])) {
