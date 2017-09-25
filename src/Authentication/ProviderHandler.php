@@ -92,9 +92,7 @@ class ProviderHandler
             throw new ConfigItemNotFoundException();
         }
 
-        $className = $provider['class'];
-
-        if (!class_exists($className)) {
+        if (!class_exists($provider['class'])) {
             throw new ClassNotFoundException();
         }
 

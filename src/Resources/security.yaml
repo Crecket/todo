@@ -1,20 +1,4 @@
 security:
-    firewalls:
-        main_firewall:
-            match: '*'
-            required_level: 0
-
-        auth_firewall:
-            match: '/auth_only'
-            required_level: 1
-
-        admin_firewall:
-            # match multipe urls
-            match:
-                - '/admin'
-                - '/admin_multiple'
-            required_level: 2
-
     authentication:
         user_model: 'Greg\ToDo\Models\User'
         providers:

@@ -2,34 +2,41 @@
 
 {% block body %}
     <div class="container">
-        <div class="card darken-1">
-            <form method="post" action="/add">
-                <div class="card-content">
-                    <span class="card-title">Login</span>
+        <div class="row">
+            <div class="col s12 push-m2 m8  push-l3 l6">
 
-                    <div class="row">
-                        <div class="input-field col s12">
-                            <input id="username" name="username" type="text" class="validate" required>
-                            <label for="username">Username</label>
+                <div class="card darken-1">
+                    <form method="post" action="/login">
+                        <div class="card-content">
+                            <span class="card-title">Login</span>
+
+                            <div class="row">
+                                <div class="input-field col s12">
+                                    <input id="username" name="username" type="text" class="validate"
+                                           required autofocus>
+                                    <label for="username">Username</label>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="input-field col s12">
+                                    <input id="password" name="password" type="text" class="validate" required>
+                                    <label for="password">Password</label>
+                                </div>
+                            </div>
+
+
+                            <div class="card-action">
+                                <button class="modal-action modal-close waves-effect waves-green btn-flat green">
+                                    Login
+                                </button>
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="input-field col s12">
-                            <input id="password" name="password" type="text" class="validate" required>
-                            <label for="password">Password</label>
-                        </div>
-                    </div>
-
-
-                <div class="card-action">
-                    <button class="modal-action modal-close waves-effect waves-green btn-flat green">
-                        Login
-                    </button>
+                    </form>
                 </div>
-            </form>
-        </div>
 
+            </div>
+        </div>
 
     </div>
 {% endblock %}

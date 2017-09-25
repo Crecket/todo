@@ -3,8 +3,6 @@
 namespace Greg\ToDo\Controllers;
 
 use Greg\ToDo\Http\Redirect;
-use Greg\ToDo\Models\User;
-use Greg\ToDo\Repositories\UserRepository;
 
 class UserController extends Controller
 {
@@ -12,7 +10,7 @@ class UserController extends Controller
      * @param \Twig_Environment $twig
      * @return string
      */
-    public function home(\Twig_Environment $twig)
+    public function index(\Twig_Environment $twig)
     {
         return $twig->render("login.twig");
     }
@@ -23,14 +21,10 @@ class UserController extends Controller
      */
     public function login(\Twig_Environment $twig)
     {
-        /** @var UserRepository $repository */
-        $repository = $this->container->get("repositories.user_repository");
-
-        $user = $repository->findBy("username", $_POST['username']);
-        if (!$user instanceof User) {
-            return new Redirect("/");
+        if (empty($_SESSION['user'])) {
+            return new Redirect("/login");
         }
 
-        return new Redirect("/");
+        return new Redirect("/home");
     }
 }

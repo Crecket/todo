@@ -49,7 +49,7 @@ class ToDoController extends Controller
 
         $repository->insert($todo);
 
-        return new Redirect("/");
+        return new Redirect("/home");
     }
 
     /**
@@ -66,7 +66,7 @@ class ToDoController extends Controller
 
         $repository->delete($todo);
 
-        return new Redirect("/");
+        return new Redirect("/home");
     }
 
     /**
@@ -81,7 +81,7 @@ class ToDoController extends Controller
         $todo = $repository->find($_POST['id']);
         if (!$todo instanceof ToDo) {
             // TODO error messages
-            return new Redirect("/");
+            return new Redirect("/home");
         }
 
         $todo->title = $_POST['title'];
@@ -90,7 +90,7 @@ class ToDoController extends Controller
 
         $repository->update($todo);
 
-        return new Redirect("/");
+        return new Redirect("/home");
     }
 
     /**
@@ -105,11 +105,11 @@ class ToDoController extends Controller
         $todo = $repository->find($_POST['id']);
         if (!$todo instanceof ToDo) {
             // TODO error messages
-            return new Redirect("/");
+            return new Redirect("/home");
         }
         $todo->completed = (int)$_POST['completed'];
 
         $repository->update($todo);
-        return new Redirect("/");
+        return new Redirect("/home");
     }
 }

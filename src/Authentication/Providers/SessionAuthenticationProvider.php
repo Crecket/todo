@@ -8,15 +8,12 @@ use Greg\ToDo\Repositories\UserRepository;
 
 class SessionAuthenticationProvider extends Provider
 {
-    /** @var null|User $user */
-    private $user;
-
     /**
      * @return bool
      */
     public function check(): bool
     {
-        if (empty($_SERVER['user'])) {
+        if (empty($_SESSION['user'])) {
             return false;
         }
 
@@ -28,14 +25,9 @@ class SessionAuthenticationProvider extends Provider
             return false;
         }
 
-        $_SESSION['user'] = $user;
+        $_SESSION['user'] = (array)$user;
         $this->user = $user;
 
         return true;
-    }
-
-    public function getUser(): ?Model
-    {
-        return $this->user;
     }
 }

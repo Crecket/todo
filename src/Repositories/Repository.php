@@ -59,9 +59,10 @@ abstract class Repository
     /**
      * @param string $column
      * @param $value
-     * @return bool|Model
+     * @param bool $single
+     * @return null|Model|Model[]
      */
-    public function findBy(string $column, $value)
+    public function findBy(string $column, $value, bool $single = false)
     {
         if ($value instanceof Model) {
             $value = $value->primary();
@@ -80,6 +81,10 @@ abstract class Repository
         $prepare->bindValue(":value", $value);
         $prepare->execute();
 
+        if ($single) {
+            $data = $prepare->fetch(\PDO::FETCH_ASSOC);
+            return $this->mapRowToModel($data);
+        }
         $data = $prepare->fetchAll(\PDO::FETCH_ASSOC);
         return $this->mapDataToModel($data);
     }
