@@ -2,11 +2,11 @@ routing:
     routes:
         - { method: 'GET', url: '/', callback: 'HomeController::index' }
 
-        - { method: 'GET', url: '/home', callback: 'ToDoController::home' }
-        - { method: 'POST', url: '/add', callback: 'ToDoController::add' }
-        - { method: 'DELETE', url: '/delete', callback: 'ToDoController::delete' }
-        - { method: 'PUT', url: '/update', callback: 'ToDoController::update' }
-        - { method: 'PUT', url: '/complete', callback: 'ToDoController::complete' }
+        - { method: 'GET', url: '/home', callback: 'ToDoController::home', middleware: 'AuthOnlyMiddleware' }
+        - { method: 'POST', url: '/add', callback: 'ToDoController::add', middleware: 'AuthOnlyMiddleware' }
+        - { method: 'DELETE', url: '/delete', callback: 'ToDoController::delete', middleware: 'AuthOnlyMiddleware' }
+        - { method: 'PUT', url: '/update', callback: 'ToDoController::update', middleware: 'AuthOnlyMiddleware' }
+        - { method: 'PUT', url: '/complete', callback: 'ToDoController::complete', middleware: 'AuthOnlyMiddleware' }
 
         - { method: 'GET', url: '/login', callback: 'UserController::index' }
         - { method: 'POST', url: '/login', callback: 'UserController::login' }
