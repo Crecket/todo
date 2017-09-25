@@ -22,7 +22,6 @@ abstract class Middleware implements MiddlewareInterface
         $this->callback = $callback;
     }
 
-
     /**
      * @param \Twig_Environment $twig
      * @return mixed

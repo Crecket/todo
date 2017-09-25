@@ -89,7 +89,9 @@ class Application
 
         // register the routes and exceptions from the configuration
         foreach ($routes as $route) {
-            $router->register($route['url'], (array)$route['method'], $route['callback']);
+            $routeObject = $router->register($route['url'], (array)$route['method'], $route['callback']);
+            // add middleware to the router if any are set
+            $routeObject->setMiddleware((array)$route['middleware'] ?? []);
         }
 
         foreach ($exceptions as $exception) {
