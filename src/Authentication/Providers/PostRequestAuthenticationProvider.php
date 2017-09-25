@@ -25,7 +25,7 @@ class PostRequestAuthenticationProvider extends Provider
             return false;
         }
 
-        if ($user->password !== $_POST['password']) {
+        if (!password_verify($_POST['password'], $user->password)) {
             return false;
         }
 
