@@ -70,6 +70,11 @@ class Service
         return $parameterValues;
     }
 
+    /**
+     * @param $parameter
+     * @return mixed|null
+     * @throws InvalidParameterException
+     */
     private function parseParameter($parameter)
     {
         if (is_string($parameter)) {
@@ -83,6 +88,10 @@ class Service
                     break;
                 case "parameter":
                     return $this->config->getParameter($parameter['parameter']);
+                    break;
+                case "config":
+                    // simply returns the config instance
+                    return $this->config;
                     break;
             }
         }

@@ -3,6 +3,7 @@ services:
         class: 'Greg\ToDo\Database'
         singleton: true
         parameters:
+            - {type: 'config'}
             - {type: 'parameter', parameter: 'database_host'}
             - {type: 'parameter', parameter: 'database_port'}
             - {type: 'parameter', parameter: 'database_name'}
@@ -19,5 +20,9 @@ services:
             - {type: 'service', service: 'application.database'}
     repositories.user_repository:
         class: '\Greg\ToDo\Repositories\UserRepository'
+        parameters:
+            - {type: 'service', service: 'application.database'}
+    repositories.usergroup_repository:
+        class: '\Greg\ToDo\Repositories\UserGroupRepository'
         parameters:
             - {type: 'service', service: 'application.database'}
