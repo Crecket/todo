@@ -4,7 +4,10 @@ namespace Greg\ToDo\Http;
 
 use Greg\ToDo\Config;
 use Greg\ToDo\DependencyInjection\Container;
+use Greg\ToDo\Exceptions\ClassNotFoundException;
 use Greg\ToDo\Exceptions\Http\PageNotFoundException;
+use Greg\ToDo\Http\Middleware\Middleware;
+use Greg\ToDo\Http\Middleware\MiddlewareInterface;
 
 class Router
 {
@@ -18,8 +21,10 @@ class Router
     private $twig;
     /** @var Container $container */
     private $container;
-    /** @var string[] */
-    private $middleware;
+    /** @var Middleware[] */
+    private $middleware = [];
+    /** @var array[] */
+    private $middlewareMap = [];
 
     /**
      * Router constructor.
@@ -104,25 +109,50 @@ class Router
     /**
      * @param string $name
      * @param string $class
+     * @return Middleware
+     * @throws ClassNotFoundException
      */
-    public function middleware(string $name, string $class)
+    public function middleware(string $name, string $class): Middleware
     {
-        $middleware[$name] = $class;
+        if (!class_exists($class)) {
+            throw new ClassNotFoundException();
+        }
+
+        $this->middleware[$name] = new $class($this->container);
+
+        if (!$this->middleware[$name] instanceof MiddlewareInterface) {
+            throw new ClassNotFoundException();
+        }
+
+        return $this->middleware[$name];
     }
 
     /**
      * @param string $route
      * @param array $methods
      * @param $callback
-     * @param array $middleware
+     * @param array $middlewares
      * @return Route|string
+     * @throws ClassNotFoundException
      */
-    public function register(string $route, array $methods, $callback, array $middleware = [])
+    public function register(string $route, array $methods, $callback, array $middlewares = [])
     {
         $routeKey = $this->uniqueRouteKey($route, $methods);
         $route = new Route($this->container, $route, $methods, $callback);
 
+        // add the middlewares this route needs to the route
+        $routeMiddleware = [];
+        foreach ($middlewares as $middleware) {
+            if ($this->middleware[$middleware]) {
+                $routeMiddleware[] = $middleware;
+            } else {
+                throw new ClassNotFoundException("Middleware was not found/registered");
+            }
+        }
+
+        // store the route in the router
         $this->routes[$routeKey] = $route;
+        $this->middlewareMap[$routeKey] = $routeMiddleware;
 
         return $route;
     }
@@ -135,14 +165,29 @@ class Router
     {
         try {
             /** @var Route $route */
-            foreach ($this->routes as $route) {
+            foreach ($this->routes as $routeKey => $route) {
                 $routeMatcher = new RouteMatcher($this->request);
 
+                // check if this route matches the url and method
                 if (!$route->isMatch($routeMatcher)) {
                     continue;
                 }
+
+                // run any middleware that this route needs
+                foreach ($this->middlewareMap[$routeKey] as $middlewareKey) {
+                    $response = $this->middleware[$middlewareKey]->run();
+
+                    // check if we encountered a redirect
+                    if ($response instanceof Redirect) {
+                        $response->redirect();
+                        exit; // prevent more actions from being taken
+                    }
+                }
+
+                // run the route
                 $response = $route->run($this->twig);
 
+                // check if we encountered a redirect
                 if ($response instanceof Redirect) {
                     $response->redirect();
                     exit; // prevent more actions from being taken

@@ -15,8 +15,6 @@ class Route
     public $methods;
     /** @var object|string $callback */
     public $callback;
-    /** @var string[] $middleware */
-    private $middleware;
 
     /**
      * Route constructor.
@@ -51,21 +49,4 @@ class Route
         $callbackHandler = new CallbackHandler($this->container);
         return $callbackHandler->run($this->callback, array($twig));
     }
-
-    /**
-     * @return string[]
-     */
-    public function getMiddleware(): array
-    {
-        return $this->middleware;
-    }
-
-    /**
-     * @param string[] $middleware
-     */
-    public function setMiddleware(array $middleware)
-    {
-        $this->middleware = $middleware;
-    }
-
 }

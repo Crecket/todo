@@ -8,17 +8,13 @@ abstract class Middleware implements MiddlewareInterface
 {
     /** @var Container $container */
     protected $container;
-    /** @var object|string $callback */
-    protected $callback;
 
     /**
      * Route constructor.
      * @param Container $container
-     * @param object|string $callback
      */
-    public function __construct(Container $container, $callback)
+    public function __construct(Container $container)
     {
         $this->container = $container;
-        $this->callback = $callback;
     }
 }

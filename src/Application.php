@@ -90,16 +90,6 @@ class Application
         $exceptions = $routing['exceptions'] ?? [];
         $middlewares = $routing['middlewares'] ?? [];
 
-        // register the routes
-        foreach ($routes as $route) {
-            $router->register(
-                $route['url'],
-                (array)$route['method'],
-                $route['callback'],
-                (array)($route['middleware'] ?? [])
-            );
-        }
-
         // register the middlewares
         foreach ($middlewares as $middlewareKey => $middlewareClass) {
             $router->middleware($middlewareKey, $middlewareClass);
@@ -110,6 +100,16 @@ class Application
             $exceptionHandler = $router->error($exception['exception'], $exception['callback']);
             // check if strict mode was set
             $exceptionHandler->setStrictMode($exception['strict'] ?? false);
+        }
+
+        // register the routes
+        foreach ($routes as $route) {
+            $router->register(
+                $route['url'],
+                (array)$route['method'],
+                $route['callback'],
+                (array)($route['middleware'] ?? [])
+            );
         }
 
         /* PLACE HARDCODED ROUTES HERE */
