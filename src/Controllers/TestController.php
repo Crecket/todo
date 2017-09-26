@@ -2,6 +2,7 @@
 
 namespace Greg\ToDo\Controllers;
 
+use Greg\ToDo\Http\Request;
 use Greg\ToDo\Models\ToDo;
 use Greg\ToDo\Models\ToDoComment;
 use Greg\ToDo\Repositories\ToDoCommentRepository;
@@ -48,12 +49,27 @@ class TestController extends Controller
         return null;
     }
 
+    /**
+     * @param \Twig_Environment $twig
+     * @return null
+     */
     public function testSecond(\Twig_Environment $twig)
     {
         /** @var UserRepository $repository */
         $repository = $this->container->get("repositories.user_repository");
         $user = $repository->findBy('id', 1);
         var_dump($user);
+        return null;
+    }
+
+    /**
+     * @param \Twig_Environment $twig
+     * @param Request $request
+     * @return null
+     */
+    public function testThird(\Twig_Environment $twig, Request $request)
+    {
+        echo $request->getParameter("parameter1");
         return null;
     }
 

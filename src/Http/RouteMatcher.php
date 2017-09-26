@@ -19,17 +19,24 @@ class RouteMatcher
     /**
      * @param string|array $url
      * @param string|array $method
-     * @return bool
+     * @return bool|array
      */
     public function match($url, $method)
     {
-        if (!is_array($url)) {
-            $url = array($url);
+        $url = (array)$url;
+        $method = (array)$method;
+
+        if (!$this->matchMethod($method)) {
+            return false;
         }
-        if (!is_array($method)) {
-            $method = array($method);
+
+        $urlMatch = $this->matchUrl($url);
+        if ($urlMatch !== false) {
+            // return the parameter array
+            return $urlMatch;
         }
-        return $this->matchUrl($url) && $this->matchMethod($method);
+
+        return false;
     }
 
     /**
@@ -62,7 +69,47 @@ class RouteMatcher
             if ($url === $this->request->getUrl()) {
                 return true;
             }
+
+            $regexResult = $this->checkRegex($url);
+            if ($regexResult !== false) {
+                return $regexResult;
+            }
         }
         return false;
+    }
+
+    /**
+     * @param string $url
+     * @return bool|array
+     */
+    private function checkRegex(string $url)
+    {
+        $targetUrlParts = explode("/", $url);
+        $requestUrlParts = explode("/", $this->request->getUrl());
+
+        if (count($targetUrlParts) !== count($requestUrlParts)) {
+            return false;
+        }
+
+        $parameters = [];
+        foreach ($targetUrlParts as $key => $targetUrlPart) {
+            // check if its a direct match
+            if ($targetUrlPart === $requestUrlParts[$key]) {
+                continue;
+            }
+
+            // check if this part is a dynamic parameter
+            $regexResult = preg_match("/^\(\:([0-9a-zA-Z_ ]*)\)$/", $targetUrlPart, $regexMatches);
+            if ($regexResult === 1) {
+                // store the value from the url into the correct parameter
+                $parameters[$regexMatches[1]] = $requestUrlParts[$key];
+                continue;
+            }
+
+            // urls didnt match and no parameter was found
+            return false;
+        }
+
+        return $parameters;
     }
 }

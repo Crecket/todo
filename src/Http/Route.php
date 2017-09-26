@@ -42,11 +42,12 @@ class Route
 
     /**
      * @param \Twig_Environment $twig
+     * @param Request $request
      * @return mixed
      */
-    public function run(\Twig_Environment $twig)
+    public function run(\Twig_Environment $twig, Request $request)
     {
         $callbackHandler = new CallbackHandler($this->container);
-        return $callbackHandler->run($this->callback, array($twig));
+        return $callbackHandler->run($this->callback, array($twig, $request));
     }
 }

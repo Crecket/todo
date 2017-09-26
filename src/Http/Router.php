@@ -118,8 +118,10 @@ class Router
             throw new ClassNotFoundException();
         }
 
+        // create the middleware instance
         $this->middleware[$name] = new $class($this->container);
 
+        // check if the middleware is of the correct type
         if (!$this->middleware[$name] instanceof MiddlewareInterface) {
             throw new ClassNotFoundException();
         }
@@ -169,8 +171,14 @@ class Router
                 $routeMatcher = new RouteMatcher($this->request);
 
                 // check if this route matches the url and method
-                if (!$route->isMatch($routeMatcher)) {
+                $routeMatchResult = $route->isMatch($routeMatcher);
+                if ($routeMatchResult === false) {
                     continue;
+                }
+
+                // set the request parameters
+                if (is_array($routeMatchResult)) {
+                    $this->request->setParameters($routeMatchResult);
                 }
 
                 // run any middleware that this route needs
@@ -185,7 +193,7 @@ class Router
                 }
 
                 // run the route
-                $response = $route->run($this->twig);
+                $response = $route->run($this->twig, $this->request);
 
                 // check if we encountered a redirect
                 if ($response instanceof Redirect) {
