@@ -321,7 +321,7 @@ abstract class Repository
 
         $relationSql = "";
         foreach ($relations["has_one"] as $targetRelation => $relationColumn) {
-            /** @var Model $model */
+            /** @var Model $targetModel */
             $targetModel = new $targetRelation;
 
             // create the inner join sql part
