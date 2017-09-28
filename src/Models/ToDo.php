@@ -2,6 +2,8 @@
 
 namespace Greg\ToDo\Models;
 
+use Greg\ToDo\ORM\Model;
+
 class ToDo extends Model
 {
     const TABLE_NAME = "todo";

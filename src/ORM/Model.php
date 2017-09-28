@@ -1,6 +1,6 @@
 <?php
 
-namespace Greg\ToDo\Models;
+namespace Greg\ToDo\ORM;
 
 use Greg\ToDo\Exceptions\ORM\GetColumnsNotImplementedException;
 

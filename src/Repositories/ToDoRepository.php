@@ -3,6 +3,7 @@
 namespace Greg\ToDo\Repositories;
 
 use Greg\ToDo\Models\ToDo;
+use Greg\ToDo\ORM\Repository;
 
 class ToDoRepository extends Repository
 {
