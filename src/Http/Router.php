@@ -192,7 +192,10 @@ class Router
                     }
                 }
 
-                // run the route
+                // register the common global twig variables
+                $this->registerTwigGlobals();
+
+                // run the route callback
                 $response = $route->run($this->twig, $this->request);
 
                 // check if we encountered a redirect
@@ -212,6 +215,11 @@ class Router
                 if (!$errorHandler->isMatch($exception)) {
                     continue;
                 }
+
+                // register the common global twig variables
+                $this->registerTwigGlobals();
+
+                // run the exception callback
                 $response = $errorHandler->run($this->twig, $exception);
 
                 if ($response instanceof Redirect) {
@@ -224,13 +232,6 @@ class Router
 
             // rethrow Exception if no matches are found
             throw $exception;
-        }
-    }
-
-    private function registerMiddleware(array $middlewares)
-    {
-        foreach ($middlewares as $middleware) {
-
         }
     }
 
@@ -270,5 +271,15 @@ class Router
     private function uniqueRouteKey(string $url, array $methods): string
     {
         return hash("sha256", $url.serialize($methods));
+    }
+
+    /**
+     *
+     */
+    private function registerTwigGlobals()
+    {
+        $this->twig->addGlobal("REQUEST_URL", $this->request->getUrl());
+        $this->twig->addGlobal("REQUEST_METHOD", $this->request->getMethod());
+        $this->twig->addGlobal("CURRENT_USER", $_SESSION['user'] ?? false);
     }
 }

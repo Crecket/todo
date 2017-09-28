@@ -1,7 +1,10 @@
-{% extends 'bootstrap.twig' %}
+{% extends 'layouts/minimal_layout.twig' %}
 
-{% block body %}
-    <div class="container">
+{% block content %}
+    <div class="container center-align">
+        <br>
+        <br>
+        <h1>500</h1>
         <p>It looks like something went wrong!</p>
         {{ exception_message|default }}
     </div>

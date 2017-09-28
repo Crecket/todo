@@ -27,4 +27,14 @@ class UserController extends Controller
 
         return new Redirect("/home");
     }
+
+    /**
+     * @param \Twig_Environment $twig
+     * @return Redirect
+     */
+    public function logout(\Twig_Environment $twig)
+    {
+        unset($_SESSION['user']);
+        return new Redirect("/");
+    }
 }

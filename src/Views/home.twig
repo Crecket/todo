@@ -1,6 +1,7 @@
-{% extends 'bootstrap.twig' %}
+{% extends 'layouts/default_layout.twig' %}
 
-{% block body %}
+{% block head %}
+    {{ parent() }}
     <style type="text/css">
         form, table {
             display: inline;
@@ -8,157 +9,167 @@
             padding: 0px;
         }
     </style>
+{% endblock %}
 
-    <div class="container">
-        <ul class="collection with-header">
-            <li class="collection-header">
-                <h4>To-Do</h4>
-            </li>
+{% block content %}
+    <ul class="collection">
+        {% for todo in todos %}
+            <li class="collection-item avatar">
+                {% if todo.completed == 1 %}
+                    <i class="material-icons circle green">check</i>
+                {% else %}
+                    <i class="material-icons circle">list</i>
+                {% endif %}
+                <span class="title">{{ todo.title }}</span>
+                <p>{{ todo.username }}</p>
+                <i>{{ todo.when }}</i>
 
-            {% for todo in todos %}
-                <li class="collection-item avatar">
-                    {% if todo.completed == 1 %}
-                        <i class="material-icons circle green">check</i>
-                    {% else %}
-                        <i class="material-icons circle">list</i>
-                    {% endif %}
-                    <span class="title">{{ todo.title }}</span>
-                    <p>{{ todo.username }}</p>
-                    <i>{{ todo.when }}</i>
+                <div class="secondary-content">
+                    <a class="waves-effect waves-light btn blue modal-trigger" href="#modal{{ todo.id }}">
+                        <i class="material-icons">mode_edit</i>
+                    </a>
 
-                    <div class="secondary-content">
-                        <a class="waves-effect waves-light btn blue modal-trigger" href="#modal{{ todo.id }}">
-                            <i class="material-icons">mode_edit</i>
-                        </a>
+                    <form method="post" action="/complete">
+                        <input type="hidden" name="_method" value="PUT"/>
+                        <input type="hidden" name="id" value="{{ todo.id }}">
 
-                        <form method="post" action="/complete">
-                            <input type="hidden" name="_method" value="PUT"/>
-                            <input type="hidden" name="id" value="{{ todo.id }}">
-
-                            {% if todo.completed == 0 %}
-                                <input type="hidden" name="completed" value="1"/>
-                                <button class="waves-effect waves-light btn green tooltipped"
-                                        data-position="top" data-delay="50" data-tooltip="Mark this item as completed">
-                                    <i class="material-icons">check_box</i>
-                                </button>
-                            {% else %}
-                                <input type="hidden" name="completed" value="0"/>
-                                <button class="waves-effect waves-light btn green tooltipped"
-                                        data-position="top" data-delay="50" data-tooltip="Set item back to not-completed">
-                                    <i class="material-icons">check_box_outline_blank</i>
-                                </button>
-                            {% endif %}
-                        </form>
-
-                        <form method="post" action="/delete">
-                            <input type="hidden" name="_method" value="DELETE"/>
-                            <input type="hidden" name="id" value="{{ todo.id }}">
-
-                            <button class="waves-effect waves-light btn red tooltipped"
-                                    data-position="top" data-delay="50" data-tooltip="Remove this item">
-                                <i class="material-icons">delete</i>
+                        {% if todo.completed == 0 %}
+                            <input type="hidden" name="completed" value="1"/>
+                            <button class="waves-effect waves-light btn green tooltipped"
+                                    data-position="top" data-delay="50" data-tooltip="Mark this item as completed">
+                                <i class="material-icons">check_box</i>
                             </button>
-                        </form>
-                    </div>
+                        {% else %}
+                            <input type="hidden" name="completed" value="0"/>
+                            <button class="waves-effect waves-light btn green tooltipped"
+                                    data-position="top" data-delay="50"
+                                    data-tooltip="Set item back to not-completed">
+                                <i class="material-icons">check_box_outline_blank</i>
+                            </button>
+                        {% endif %}
+                    </form>
 
-                    <div id="modal{{ todo.id }}" class="modal">
-                        <form method="post" action="/update">
-                            <input type="hidden" name="_method" value="PUT"/>
-                            <input type="hidden" name="id" value="{{ todo.id }}">
+                    <form method="post" action="/delete">
+                        <input type="hidden" name="_method" value="DELETE"/>
+                        <input type="hidden" name="id" value="{{ todo.id }}">
 
-                            <div class="modal-content">
-                                <h4>Update ToDo</h4>
+                        <button class="waves-effect waves-light btn red tooltipped"
+                                data-position="top" data-delay="50" data-tooltip="Remove this item">
+                            <i class="material-icons">delete</i>
+                        </button>
+                    </form>
+                </div>
 
-                                <div class="row">
-                                    <div class="input-field col s12">
-                                        <input id="title" type="text" name="title" class="validate"
-                                               value="{{ todo.title }}">
-                                        <label for="title">Title</label>
-                                    </div>
-                                </div>
+                <div id="modal{{ todo.id }}" class="modal">
+                    <form method="post" action="/update">
+                        <input type="hidden" name="_method" value="PUT"/>
+                        <input type="hidden" name="id" value="{{ todo.id }}">
 
-                                <div class="row">
-                                    <div class="input-field col s12">
-                                        <select id="user_id" name="user_id" class="validate">
-                                            <option value="" disabled selected>Choose your option</option>
-                                            {% for user in users %}
-                                                <option value="{{ user.id }}"
-                                                        {% if user.id == todo.user_id %}selected{% endif %}>
-                                                    {{ user.username }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
-                                        <label>Assigned user</label>
-                                    </div>
-                                </div>
+                        <div class="modal-content">
+                            <h4>Update ToDo</h4>
 
-                                <div class="row">
-                                    <div class="input-field col s12">
-                                        <input id="when" name="when" type="datetime-local" class="validate"
-                                               value="{{ todo.when|date("Y-m-d\\TH:i") }}" required>
-                                    </div>
+                            <div class="row">
+                                <div class="input-field col s12">
+                                    <input id="title" type="text" name="title" class="validate"
+                                           value="{{ todo.title }}">
+                                    <label for="title">Title</label>
                                 </div>
                             </div>
 
-                            <div class="modal-footer">
-                                <button class="modal-action modal-close waves-effect waves-green btn-flat green">
-                                    Update
-                                </button>
-                                <a class="modal-action modal-close waves-effect waves-red btn-flat">Cancel</a>
+                            <div class="row">
+                                <div class="input-field col s12">
+                                    <select id="user_id" name="user_id" class="validate">
+                                        <option value="" disabled selected>Choose your option</option>
+                                        {% for user in users %}
+                                            <option value="{{ user.id }}"
+                                                    {% if user.id == todo.user_id %}selected{% endif %}>
+                                                {{ user.username }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <label>Assigned user</label>
+                                </div>
                             </div>
 
-                        </form>
-                    </div>
-
-                </li>
-            {% endfor %}
-        </ul>
-
-        <div class="card darken-1">
-            <form method="post" action="/add">
-                <div class="card-content">
-                    <span class="card-title">New ToDo item</span>
-
-                    <div class="row">
-                        <div class="input-field col s12">
-                            <input id="title" name="title" type="text" class="validate" required>
-                            <label for="title">Title</label>
+                            <div class="row">
+                                <div class="input-field col s12">
+                                    <input id="when" name="when" type="datetime-local" class="validate"
+                                           value="{{ todo.when|date("Y-m-d\\TH:i") }}" required>
+                                </div>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="input-field col s12">
-                            <select id="user_id" name="user_id" class="validate">
-                                <option value="" disabled selected>Assign a user</option>
-                                {% for user in users %}
-                                    <option value="{{ user.id }}"
-                                            {% if user.id == todo.user_id %}selected{% endif %}>
-                                        {{ user.username }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                            <label>Assigned user</label>
+                        <div class="modal-footer">
+                            <button class="modal-action modal-close waves-effect waves-green btn-flat green">
+                                Update
+                            </button>
+                            <a class="modal-action modal-close waves-effect waves-red btn-flat">Cancel</a>
                         </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="input-field col s12">
-                            <input id="when" name="when" type="datetime-local" class="validate" required>
-                            {#<label for="when">When</label>#}
-                        </div>
+                    </form>
+                </div>
+
+            </li>
+        {% endfor %}
+    </ul>
+
+    <div class="card darken-1">
+        <form method="post" enctype="multipart/form-data" action="/add">
+            <div class="card-content">
+                <span class="card-title">New ToDo item</span>
+
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input id="title" name="title" type="text" class="validate" required>
+                        <label for="title">Title</label>
                     </div>
                 </div>
 
-                <div class="card-action">
-                    <button class="modal-action modal-close waves-effect waves-green btn-flat green">
-                        Create
-                    </button>
+                <div class="row">
+                    <div class="input-field col s12">
+                        <select id="user_id" name="user_id" class="validate">
+                            <option value="" disabled selected>Assign a user</option>
+                            {% for user in users %}
+                                <option value="{{ user.id }}"
+                                        {% if user.id == todo.user_id %}selected{% endif %}>
+                                    {{ user.username }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <label>Assigned user</label>
+                    </div>
                 </div>
-            </form>
-        </div>
 
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input id="when" name="when" type="datetime-local" class="validate" required>
+                        {#<label for="when">When</label>#}
+                    </div>
+                </div>
 
+                <div class="row">
+                    <div class="col s12">
+                        <div class="file-field input-field">
+                            <div class="btn">
+                                <span>File</span>
+                                <input type="file">
+                            </div>
+                            <div class="file-path-wrapper">
+                                <input class="file-path validate" type="text">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-action">
+                <button class="modal-action modal-close waves-effect waves-green btn green">
+                    Create
+                </button>
+            </div>
+        </form>
     </div>
+
 {% endblock %}
 
 {% block js %}

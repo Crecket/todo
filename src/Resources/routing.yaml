@@ -9,6 +9,7 @@ routing:
         - { method: 'PUT', url: '/complete', callback: 'ToDoController::complete', middleware: 'authenticated_only' }
 
         - { method: 'GET', url: '/login', callback: 'UserController::index', middleware: 'anonymous_only' }
+        - { method: 'GET', url: '/logout', callback: 'UserController::logout', middleware: 'authenticated_only' }
         - { method: 'POST', url: '/login', callback: 'UserController::login' }
 
         - { method: 'GET', url: '/test', callback: 'TestController::test' }
