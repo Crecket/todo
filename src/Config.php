@@ -26,18 +26,10 @@ class Config
      * @param string $parameter
      * @param bool $strict
      * @return null
-     * @throws ParameterNotFoundException
      */
     public function getParameter(string $parameter, bool $strict = false)
     {
-        if (empty($this->config['parameters'][$parameter])) {
-            if ($strict) {
-                throw new ParameterNotFoundException("Parameter ".$parameter." is required and was not found");
-            }
-            return null;
-        }
-
-        return $this->config['parameters'][$parameter];
+        return $this->get("parameters.$parameter", $strict);
     }
 
     /**
