@@ -26,24 +26,33 @@ abstract class Repository
 
     /**
      * @param $value
+     * @param bool $hasOneRelations
      * @return bool|Model
      */
-    public function find($value)
+    public function find($value, bool $hasOneRelations = false)
     {
         if ($value instanceof Model) {
             $value = $value->primary();
         }
 
-        $sql = "SELECT *, `primary_table`.`id` FROM `".static::TABLE_NAME."` as `primary_table`";
-
-        // generate the relations sql
-        $sqlRelations = $this->getRelationSql();
+        $sqlStart = "SELECT *, `primary_table`.`id` FROM `".static::TABLE_NAME."` as `primary_table`";
 
         // where statement to fetch the correct item
         $sqlWhere = " WHERE `primary_table`.`id` = :value";
 
+        if($hasOneRelations){
+            // generate the relations sql
+            $sqlRelations = $this->getRelationSql();
+
+            // combine sql parts
+            $sql = $sqlStart.$sqlRelations.$sqlWhere;
+        }else{
+            // combine sql parts
+            $sql = $sqlStart.$sqlWhere;
+        }
+
         // execute the query
-        $prepare = $this->database->connection->prepare($sql.$sqlRelations.$sqlWhere);
+        $prepare = $this->database->connection->prepare($sql);
         $prepare->bindValue(":value", $value);
         $prepare->execute();
         $row = $prepare->fetch(\PDO::FETCH_ASSOC);
@@ -59,24 +68,33 @@ abstract class Repository
      * @param string $column
      * @param $value
      * @param bool $single
+     * @param bool $hasOneRelations
      * @return null|Model|Model[]
      */
-    public function findBy(string $column, $value, bool $single = false)
+    public function findBy(string $column, $value, bool $single = false, bool $hasOneRelations = false)
     {
         if ($value instanceof Model) {
             $value = $value->primary();
         }
 
-        $sql = "SELECT *, `primary_table`.`id` FROM `".static::TABLE_NAME."` as `primary_table`";
-
-        // generate the relations sql
-        $sqlRelations = $this->getRelationSql();
+        $sqlStart = "SELECT *, `primary_table`.`id` FROM `".static::TABLE_NAME."` as `primary_table`";
 
         // where statement to fetch the correct item
         $sqlWhere = " WHERE `primary_table`.`".$column."` = :value";
 
+        if($hasOneRelations){
+            // generate the relations sql
+            $sqlRelations = $this->getRelationSql();
+
+            // combine sql parts
+            $sql = $sqlStart.$sqlRelations.$sqlWhere;
+        }else{
+            // combine sql parts
+            $sql = $sqlStart.$sqlWhere;
+        }
+
         // execute the query
-        $prepare = $this->database->connection->prepare($sql.$sqlRelations.$sqlWhere);
+        $prepare = $this->database->connection->prepare($sql);
         $prepare->bindValue(":value", $value);
         $prepare->execute();
 
@@ -217,11 +235,8 @@ abstract class Repository
         $targetColumn = $primaryRelations["has_many"][$targetModelName];
 
         // Select from current model and fetch any relations
-        $sqlStart = "SELECT * FROM `".$targetModel::TABLE_NAME."` as `primary_table`";
-        $sqlRelations = $this->getRelationSql($targetModelName);
-        $sqlWhere = " WHERE `primary_table`.`".$targetColumn."` = ?";
+        $sql = "SELECT * FROM `".$targetModel::TABLE_NAME."` as `primary_table` WHERE `primary_table`.`".$targetColumn."` = ?";
 
-        $sql = $sqlStart.$sqlRelations.$sqlWhere;
         $targetModels = $this->executeSql($sql, array($primaryModel->primary()), false);
         return $this->mapDataToModel($targetModels, $targetModelName);
     }
@@ -255,11 +270,8 @@ abstract class Repository
         $targetColumn = $primaryRelations["belongs_to"][$targetModelName];
 
         // Select from current model and fetch any relations
-        $sqlStart = "SELECT * FROM `".$targetModel::TABLE_NAME."` as `primary_table`";
-        $sqlRelations = $this->getRelationSql($targetModelName);
-        $sqlWhere = " WHERE `primary_table`.`".$targetColumn."` = ?";
+        $sql = "SELECT * FROM `".$targetModel::TABLE_NAME."` as `primary_table` WHERE `primary_table`.`".$targetColumn."` = ?";
 
-        $sql = $sqlStart.$sqlRelations.$sqlWhere;
         $targetModels = $this->executeSql($sql, array($primaryModel->$primaryColumn), false);
         return $this->mapDataToModel($targetModels, $targetModelName);
     }
@@ -288,17 +300,14 @@ abstract class Repository
         $primaryColumn = $primaryRelations["has_one"][$targetModelName];
 
         // Select from current model and join on $table_to_join
-        $sqlStart = "SELECT * FROM `".$targetModel::TABLE_NAME."` as `primary_table`";
-        $sqlRelations = $this->getRelationSql($targetModelName);
-        $sqlWhere = " WHERE `primary_table`.`".$primaryColumn."` = ?";
+        $sql = "SELECT * FROM `".$targetModel::TABLE_NAME."` as `primary_table` WHERE `primary_table`.`".$primaryColumn."` = ?";
 
-        $sql = $sqlStart.$sqlRelations.$sqlWhere;
         $targetModel = $this->executeSql($sql, array($primaryModel->$primaryColumn));
         return $this->mapRowToModel($targetModel, $targetModelName);
     }
 
     /**
-     * Generates required sql for 'hasOne' relations
+     * Generates required sql for 'hasOne' relations recursively
      *
      * @param string $modelName
      * @param string $joinTable
