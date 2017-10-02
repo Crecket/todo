@@ -23,10 +23,15 @@
                 <span class="title">{{ todo.title }}</span>
                 <p>{{ todo.username }}</p>
                 <i>{{ todo.when }}</i>
-
                 <div class="secondary-content">
                     <a class="waves-effect waves-light btn blue modal-trigger" href="#modal{{ todo.id }}">
                         <i class="material-icons">mode_edit</i>
+                    </a>
+
+                    <a class="waves-effect waves-light btn purple modal-trigger tooltipped" href="/file/{{ todo.id }}"
+                       {% if todo.file|default(false) == false %}disabled{% endif %}
+                       data-position="top" data-delay="50" data-tooltip="Download the help file for this item">
+                        <i class="material-icons">attach_file</i>
                     </a>
 
                     <form method="post" action="/complete">
