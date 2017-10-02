@@ -9,13 +9,7 @@ class ErrorController extends Controller
 
     public function error500(\Twig_Environment $twig, \Exception $exception)
     {
-        var_dump($exception);
-        exit;
-
-        return new Response($twig->render("errors/error500.twig", array(
-            "exception" => $exception,
-            "exception_message" => $exception->getMessage()
-        )), 500);
+        return new Response($twig->render("errors/error500.twig"), 500);
     }
 
     public function error404(\Twig_Environment $twig)
