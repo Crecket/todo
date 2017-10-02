@@ -12,6 +12,8 @@ class ToDo extends Model
     public $id;
     /** @var string $title */
     public $title;
+    /** @var string $file */
+    public $file;
     /** @var int $user_id */
     public $user_id;
     /** @var int $completed */
@@ -52,6 +54,7 @@ class ToDo extends Model
         return [
             'id',
             'title',
+            'file',
             'user_id',
             'completed',
             'when',

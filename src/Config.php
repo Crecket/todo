@@ -69,7 +69,7 @@ class Config
         }
 
         foreach ($keyParts as $keyPart) {
-            if (isset($configScope[$keyPart]) || is_null($configScope[$keyPart])) {
+            if (!empty($configScope[$keyPart]) || key_exists($keyPart, $configScope)) {
                 $configScope = $configScope[$keyPart];
                 continue;
             }

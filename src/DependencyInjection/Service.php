@@ -89,6 +89,9 @@ class Service
                 case "parameter":
                     return $this->config->getParameter($parameter['parameter']);
                     break;
+                case "config_item":
+                    return $this->config->get($parameter['config_item']);
+                    break;
                 case "config":
                     // simply returns the config instance
                     return $this->config;

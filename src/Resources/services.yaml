@@ -10,6 +10,13 @@ services:
             - {type: 'parameter', parameter: 'database_user'}
             - {type: 'parameter', parameter: 'database_password'}
 
+    application.file_handler:
+        class: '\Greg\ToDo\FileHandler'
+        parameters:
+            - {type: 'config_item', config_item: 'application.upload_dir'}
+            - {type: 'service', service: 'repositories.file_repository'}
+
+    # database repositories
     repositories.todo_repository:
         class: '\Greg\ToDo\Repositories\ToDoRepository'
         parameters:
@@ -24,5 +31,9 @@ services:
             - {type: 'service', service: 'application.database'}
     repositories.usergroup_repository:
         class: '\Greg\ToDo\Repositories\UserGroupRepository'
+        parameters:
+            - {type: 'service', service: 'application.database'}
+    repositories.file_repository:
+        class: '\Greg\ToDo\Repositories\FileRepository'
         parameters:
             - {type: 'service', service: 'application.database'}

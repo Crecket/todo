@@ -6,4 +6,5 @@ imports:
 
 application:
     debug: true
-    cache_dir: 'cache'
+    cache_dir: 'cache/'
+    upload_dir: 'uploads/'

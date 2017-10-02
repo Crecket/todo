@@ -114,7 +114,7 @@
     </ul>
 
     <div class="card darken-1">
-        <form method="post" enctype="multipart/form-data" action="/add">
+        <form method="POST" enctype="multipart/form-data" action="/add">
             <div class="card-content">
                 <span class="card-title">New ToDo item</span>
 
@@ -152,7 +152,7 @@
                         <div class="file-field input-field">
                             <div class="btn">
                                 <span>File</span>
-                                <input type="file">
+                                <input type="file" name="uploaded_file">
                             </div>
                             <div class="file-path-wrapper">
                                 <input class="file-path validate" type="text">

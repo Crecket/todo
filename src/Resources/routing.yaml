@@ -7,6 +7,7 @@ routing:
         - { method: 'DELETE', url: '/delete', callback: 'ToDoController::delete', middleware: 'authenticated_only' }
         - { method: 'PUT', url: '/update', callback: 'ToDoController::update', middleware: 'authenticated_only' }
         - { method: 'PUT', url: '/complete', callback: 'ToDoController::complete', middleware: 'authenticated_only' }
+        - { method: 'GET', url: '/file/(:todo_id)', callback: 'ToDoController::downloadTodoFile', middleware: 'authenticated_only' }
 
         - { method: 'GET', url: '/login', callback: 'UserController::index', middleware: 'anonymous_only' }
         - { method: 'GET', url: '/logout', callback: 'UserController::logout', middleware: 'authenticated_only' }

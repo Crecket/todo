@@ -6,10 +6,6 @@ use Greg\ToDo\Authentication\ProviderHandler;
 use Greg\ToDo\Console\Commands\UpdateSchemaCommand;
 use Greg\ToDo\Console\ConsoleHandler;
 use Greg\ToDo\DependencyInjection\Container;
-use Greg\ToDo\Exceptions\Http\BadRequestException;
-use Greg\ToDo\Exceptions\Http\PageNotFoundException;
-use Greg\ToDo\Exceptions\Http\PermissionDeniedException;
-use Greg\ToDo\Http\Request;
 use Greg\ToDo\Http\Response;
 use Greg\ToDo\Http\Router;
 
@@ -34,6 +30,8 @@ class Application
      */
     public function __construct(bool $consoleMode = false)
     {
+        define("ROOT", __DIR__."/../");
+
         $this->consoleMode = $consoleMode;
 
         $this->config = $this->loadConfig();
