@@ -20,6 +20,8 @@ class SessionAuthenticationProvider extends Provider
         /** @var UserRepository $userRepository */
         $userRepository = $this->container->get("repositories.user_repository");
 
+        // check if the user still exists
+        /** @var User $user */
         $user = $userRepository->find($_SESSION['user']['id']);
         if (!$user instanceof User) {
             return false;

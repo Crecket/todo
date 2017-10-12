@@ -19,6 +19,7 @@ class PostRequestAuthenticationProvider extends Provider
         /** @var UserRepository $userRepository */
         $userRepository = $this->container->get("repositories.user_repository");
 
+        // find the user by username
         /** @var User $user */
         $user = $userRepository->findBy("username", $_POST['username'], true);
         if (!$user instanceof User) {

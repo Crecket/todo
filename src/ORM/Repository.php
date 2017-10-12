@@ -150,6 +150,7 @@ abstract class Repository
         $properties = get_object_vars($model);
 
         $first = true;
+        // generate the sql
         foreach ($properties as $columnName => $columnValue) {
             if (is_null($columnValue)) {
                 continue;
@@ -168,6 +169,7 @@ abstract class Repository
         }
         $sql .= ") VALUES (".$sql_questionmarks.")";
 
+        // prepare the query and execute with the values from the model
         $prepare = $this->database->connection->prepare($sql);
         $prepare->execute($column_values);
         return $prepare->rowcount();
@@ -206,6 +208,7 @@ abstract class Repository
         $sql .= " WHERE `id` = ?";
         $column_values[] = $model->primary();
 
+        // prepare the query and execute with the values from the model
         $prepare = $this->database->connection->prepare($sql);
         $prepare->execute($column_values);
         return $prepare->rowcount();

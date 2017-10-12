@@ -30,17 +30,21 @@ class Container
      */
     public function get(string $id)
     {
+        // get the service and create a new service object with our config and container
         $serviceInfo = $this->config->getService($id);
         $service = new Service($this->config, $this, $serviceInfo);
 
+        // if this isn't a singleton we return a new instance
         if (!$service->isSingleton()) {
             return $service->createInstance();
         }
 
+        // check if we already have a singleton instance and return it if we do
         if (!empty($this->singletons[$service->getClass()])) {
             return $this->singletons[$service->getClass()];
         }
 
+        // create a new instance, store it in the list and return the instance
         $instance = $service->createInstance();
         $this->singletons[$service->getClass()] = $instance;
         return $instance;

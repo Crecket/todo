@@ -32,14 +32,17 @@ class Service
         $this->container = $container;
         $this->class = $service['class'];
 
+        // make sure class exists
         if (!class_exists($service['class'])) {
             throw new ClassNotFoundException();
         }
 
+        // fetch the parameters if we have any
         if (!empty($service['parameters'])) {
             $this->parameters = $this->getParameterValues($service['parameters']);
         }
 
+        // check if this is a singleton
         if (!empty($service['singleton'])) {
             if (!is_bool($service['singleton'])) {
                 throw new IncorrectTypeException();
@@ -54,6 +57,7 @@ class Service
      */
     public function createInstance()
     {
+        // create the instance and setup the
         return new $this->class(...array_values($this->parameters));
     }
 
@@ -81,6 +85,7 @@ class Service
             return $parameter;
         }
 
+        // get the correct parameter type
         if (is_array($parameter)) {
             switch ($parameter['type']) {
                 case "service":

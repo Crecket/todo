@@ -42,12 +42,13 @@ class ToDoController extends Controller
      */
     public function add()
     {
+        // create new todo item and set the properties
         $todo = new ToDo();
         $todo->title = $_POST['title'];
         $todo->user_id = $_POST['user_id'];
         $todo->when = $_POST['when'];
 
-
+        // check if we received a file and store it if we did
         if (!empty($_FILES['uploaded_file'])) {
             /** @var FileHandler $fileHandler */
             $fileHandler = $this->container->get("application.file_handler");
@@ -78,6 +79,7 @@ class ToDoController extends Controller
         /** @var ToDoRepository $repository */
         $repository = $this->container->get("repositories.todo_repository");
 
+        // remove the todo item
         $repository->delete($todo);
 
         return new Redirect("/home");
@@ -91,12 +93,14 @@ class ToDoController extends Controller
         /** @var ToDoRepository $repository */
         $repository = $this->container->get("repositories.todo_repository");
 
+        // check if we have a todo item with this id
         $todo = $repository->find($_POST['id']);
         if (!$todo instanceof ToDo) {
             // TODO error messages
             return new Redirect("/home");
         }
 
+        // update the properties and update it
         $todo->title = $_POST['title'];
         $todo->user_id = $_POST['user_id'];
         $todo->when = $_POST['when'];
@@ -114,13 +118,16 @@ class ToDoController extends Controller
         /** @var ToDoRepository $repository */
         $repository = $this->container->get("repositories.todo_repository");
 
+        // check if we have a todo item with this id
         $todo = $repository->find($_POST['id']);
         if (!$todo instanceof ToDo) {
             // TODO error messages
             return new Redirect("/home");
         }
+        // mark as completed/not completed
         $todo->completed = (int)$_POST['completed'];
 
+        // update the item and redirect
         $repository->update($todo);
         return new Redirect("/home");
     }
@@ -130,8 +137,8 @@ class ToDoController extends Controller
         /** @var ToDoRepository $todoRepository */
         $todoRepository = $this->container->get("repositories.todo_repository");
 
+        // find the todo item
         $todo = $todoRepository->find($request->getParameter("todo_id"));
-
         if (!$todo instanceof ToDo) {
             // TODO error messages
             return new Redirect("/home");
@@ -145,6 +152,7 @@ class ToDoController extends Controller
         /** @var FileHandler $fileHandler */
         $fileHandler = $this->container->get("application.file_handler");
 
+        // find the file and return it
         return $fileHandler->outputFile($todo->file);
     }
 }

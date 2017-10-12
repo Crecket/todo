@@ -45,15 +45,17 @@ class ProviderHandler
                 throw new InvalidConfigurationException("Missing required match.url property for authentication provider configuration");
             }
 
-            // default method to GET
+            // default method to GET with no URLS
             $matchMethod = $provider['match']['method'] ?? array("GET");
             $matchUrl = (array)$provider['match']['url'] ?? [];
 
+            // check if this request matches the urls and methods
             $routeMatcher = new RouteMatcher($request);
             if (!$routeMatcher->match($matchUrl, $matchMethod)) {
                 continue;
             }
 
+            // create a new instance for the provider and check the results
             /** @var Provider $providerInstance */
             $providerInstance = new $provider['class']($this->container);
             if (!$providerInstance->check()) {
@@ -70,13 +72,16 @@ class ProviderHandler
      */
     private function initialConfiguration()
     {
+        // set the user model name
         $this->userModel = $this->container->getConfig()->get("security.authentication.user_model", true);
         if (!class_exists($this->userModel)) {
             throw new ClassNotFoundException("The configured user_model class does not exist");
         }
 
+        // get auth providers and loop through them
         $providers = (array)$this->container->getConfig()->get("security.authentication.providers");
         foreach ($providers as $providerName => $provider) {
+            // loop through providers
             $this->setupProvider($providerName, $provider);
         }
     }
@@ -89,10 +94,12 @@ class ProviderHandler
      */
     private function setupProvider(string $providerName, array $provider)
     {
+        // check if provider has a class configured
         if (empty($provider['class'])) {
             throw new ConfigItemNotFoundException();
         }
 
+        // check if the class exists
         if (!class_exists($provider['class'])) {
             throw new ClassNotFoundException();
         }

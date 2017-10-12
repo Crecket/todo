@@ -13,10 +13,6 @@ routing:
         - { method: 'GET', url: '/logout', callback: 'UserController::logout', middleware: 'authenticated_only' }
         - { method: 'POST', url: '/login', callback: 'UserController::login' }
 
-        - { method: 'GET', url: '/test', callback: 'TestController::test' }
-        - { method: 'GET', url: '/test2', callback: 'TestController::testSecond' }
-        - { method: 'GET', url: '/test/(:parameter1)', callback: 'TestController::testThird' }
-
     middlewares:
         authenticated_only: '\Greg\ToDo\Http\Middleware\AuthOnlyMiddleware'
         anonymous_only: '\Greg\ToDo\Http\Middleware\AnonymousOnlyMiddleware'
